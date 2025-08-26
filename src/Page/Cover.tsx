@@ -300,6 +300,12 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
                 </div>
             )}
 
+            {isRepositioning && (
+                <div className={styles.repositionOverlay} data-testid="reposition-overlay">
+                    <div className={styles.repositionText}>Drag to reposition</div>
+                </div>
+            )}
+
             {/* Always show reposition controls when active */}
             {isRepositioning && (
                 <div className={styles.repositionControls}>
