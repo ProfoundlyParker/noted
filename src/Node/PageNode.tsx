@@ -119,7 +119,6 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
             }
 
             removeNodeByIndex(index);
-            console.log("Page deleted successfully");
         };
 
     useEffect(() => {

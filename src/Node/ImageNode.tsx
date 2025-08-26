@@ -158,7 +158,7 @@ const updateNodeCaptionInPage = async (pageId: string, nodeId: string, newCaptio
         if (updateError) {
             console.error("Error updating node caption:", updateError);
         } else {
-            console.log("Caption saved successfully!");
+            return;
         }
     };
 
