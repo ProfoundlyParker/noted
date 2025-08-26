@@ -94,3 +94,17 @@
     opacity: 1 !important;
   }
 }
+
+.repositionOverlay {
+	width: auto;
+	height: auto;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 10;
+	border-radius: 10px;
+	padding: 0.4rem;
+	font-weight: bold;
+	color: white;
+}

@@ -93,7 +93,25 @@ export function withInitialState<TProps>(
     }
 
     if (!initialState) {
-      return <div className={styles.centeredFlex}>Page not found</div>;
+      return (
+        <div className={styles.container}>
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png"
+            alt="Lost page illustration"
+            className={styles.image}
+          />
+          <h1 className={styles.title}>Oops! This page doesn’t exist.</h1>
+          <p className={styles.subtitle}>
+            You might have mistyped the URL, or this page has been torn from the notebook. 📔
+          </p>
+          <button
+            className={styles.pageNotFoundButton}
+            onClick={() => (window.location.href = '/')}
+          >
+            Return to Home
+          </button>
+        </div>
+      );
     }
 
     return <WrappedComponent {...props} initialState={initialState} />;
