@@ -100,7 +100,7 @@ export function withInitialState<TProps>(
             alt="Lost page illustration"
             className={styles.image}
           />
-          <h1 className={styles.title}>Oops! This page doesn’t exist.</h1>
+          <h1 className={styles.notFoundTitle}>Oops! This page doesn’t exist.</h1>
           <p className={styles.subtitle}>
             You might have mistyped the URL, or this page has been torn from the notebook. 📔
           </p>
