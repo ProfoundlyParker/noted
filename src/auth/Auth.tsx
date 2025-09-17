@@ -52,11 +52,12 @@ export const Auth = () => {
 
     return (
         <div className={styles.wrapper}>
+            <div className={styles.label}>
             <form
                 onSubmit={handleLogin}
                 className={`${styles.login} ${loading ? styles.loading : ""} ${success ? styles.ok : ""}`}
             >
-                <h1 className={styles.title}>Noted 📝</h1>
+                <h1 className={styles.title} style={{'textDecoration': 'underline'}}>Noted</h1>
                 <p className={styles.p}>Enter your email address below and you'll be sent a login link</p>
                 <div className={styles.inputGroup}>
                     <input
@@ -81,6 +82,7 @@ export const Auth = () => {
                     </span>
                 </button>
             </form>
+            </div>
         </div>
     );
 }
