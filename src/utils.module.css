@@ -57,15 +57,19 @@
   }
   .p {
     transform: scale(0.8);
+    margin-bottom: 0px !important
   }
   .input, .inputGroup {
     transform: scale(0.9);
   }
   .button {
     transform: scale(0.8);
-    margin-top: 0 !important;
-    padding: 1rem !important;
+    margin-top: -1.5rem !important;
+    padding: 3% 1px !important;
     margin-bottom: 0.35rem !important;
+  }
+  .inputGroup :global(.fa-user) {
+    left: 1.77rem !important;
   }
 }
 
@@ -164,7 +168,7 @@
 .inputGroup :global(.fa-user) {
   position: absolute;
   top: 50%;
-  left: 10px;
+  left: 0.7rem;
   transform: translateY(-50%);
   color: white;
   font-size: 1em;
