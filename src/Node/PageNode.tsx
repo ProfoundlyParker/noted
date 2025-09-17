@@ -148,7 +148,7 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
                 ) : (
                     <div className={styles.pageCover} onClick={handlePageClick}>
                     <img
-                        src="./src/Page/Cover Image.png"
+                        src="./src/Page/noted-cover.png"
                         alt="Default cover"
                         className={styles.pageCoverImg}
                     />
