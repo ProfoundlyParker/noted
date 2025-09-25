@@ -17,7 +17,7 @@ type SupportedNodeType = {
 
 const supportedNodeTypes: SupportedNodeType[] = [
     {value: "text", name: "Text"},
-    {value: "list", name: "Bulleted List"},
+    {value: "list", name: "List"},
     {value: "numberedList", name: "Numbered List"},
     {value: "page", name: "Page"},
     {value: "image", name: "Image"},

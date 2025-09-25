@@ -28,7 +28,7 @@ describe('CommandPanel component', () => {
   it('renders all supported node types', () => {
     render(<CommandPanel selectItem={mockSelectItem} nodeText="" />);
     expect(screen.getByText('Text')).toBeInTheDocument();
-    expect(screen.getByText('Bulleted List')).toBeInTheDocument();
+    expect(screen.getByText('List')).toBeInTheDocument();
     expect(screen.getByText('Numbered List')).toBeInTheDocument();
     expect(screen.getByText('Page')).toBeInTheDocument();
     expect(screen.getByText('Image')).toBeInTheDocument();
