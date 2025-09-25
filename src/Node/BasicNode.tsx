@@ -25,13 +25,15 @@ export const BasicNode = ({
     const placeCaretAtEnd = (el: HTMLElement) => {
         el.focus();
         const range = document.createRange();
-        range.selectNodeContents(el);
-        range.collapse(false);
         const sel = window.getSelection();
-        if (sel) {
-            sel.removeAllRanges();
-            sel.addRange(range);
+        if (el.lastChild) {
+            range.setStart(el.lastChild, (el.lastChild.textContent || "").length);
+        } else {
+            range.setStart(el, 0);
         }
+        range.collapse(false);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
     };    
 
     const { changeNodeValue, changeNodeType, removeNodeByIndex, addNode } = useAppState();
