@@ -19,7 +19,7 @@ export const NumberedListNode = ({
     registerRef?: (index: number, ref: HTMLDivElement) => void;
 }) => {
     const nodeRef = useRef<HTMLDivElement>(null);
-    const { changeNodeValue, removeNodeByIndex, addNode, changeNodeType } = useAppState();
+    const { changeNodeValue, removeNodeByIndex, addNode, changeNodeType, nodes } = useAppState();
     const showCommandPanel = isFocused && node?.value?.match(/^\//);
     const [currentNodeType, setCurrentNodeType] = useState<NodeType>(node.type);
     const [justChangedType, setJustChangedType] = useState(false);
@@ -58,12 +58,86 @@ export const NumberedListNode = ({
     };
 
     const parseCommand = (nodeType: NodeType) => {
-        if (nodeRef.current) {
-            changeNodeType(index, nodeType);
-            nodeRef.current.textContent = "";
-            setJustChangedType(true);
-        }
-    }
+        if (!nodeRef.current) return;
+          const editable = nodeRef.current;
+            let text = editable.textContent ?? "";
+
+            // Trim and normalize any stray zero-width spaces or whitespace
+            text = text.replace(/\u200B/g, "").trim();
+
+            // Clear before changing type to avoid leftover placeholder
+            changeNodeValue(index, text);
+            editable.textContent = text;
+
+            if (text === "") {
+                changeNodeValue(index, "");
+            }
+
+        changeNodeType(index, nodeType);
+        setJustChangedType(true);
+    };
+
+    // Helper: focus the contenteditable for node `idx` and place caret at end
+    const focusEditableAtIndex = (idx: number, placeCaretAtEnd = true) => {
+    // Run on next paint so the DOM reflects the removed/updated node
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const container = document.querySelector(`[data-node-index="${idx}"]`) as HTMLElement | null;
+            if (!container) {
+            return;
+            }
+
+            // Find any descendant with contenteditable
+            const editable = container.querySelector<HTMLElement>('[contenteditable]');
+
+            // If there's no editable element (image/page/etc.), still update focused index so UI highlights the node
+            if (!editable) {
+            updateFocusedIndex(idx);
+            return;
+            }
+
+            // If there's a zero-width placeholder, normalize it out for caret placement
+            if (editable.textContent === "\u200B") {
+            editable.textContent = "";
+            }
+
+            // Focus the editable element
+            editable.focus();
+
+            // Place caret robustly: if there's a text node use it, otherwise collapse to start/end of the editable
+            const sel = window.getSelection();
+            if (!sel) {
+                updateFocusedIndex(idx);
+                return;
+            }
+
+            const range = document.createRange();
+            const walker = document.createTreeWalker(editable, NodeFilter.SHOW_TEXT, null);
+            let lastTextNode: Text | null = null;
+            while (walker.nextNode()) {
+                lastTextNode = walker.currentNode as Text;
+            }
+
+            if (lastTextNode) {
+                // place caret at end or start of the last node
+                const offset = placeCaretAtEnd ? (lastTextNode.textContent?.length ?? 0) : 0;
+                range.setStart(lastTextNode, Math.min(offset, lastTextNode.textContent?.length ?? 0));
+                range.setEnd(lastTextNode, Math.min(offset, lastTextNode.textContent?.length ?? 0));
+            } else {
+                // no text nodes — select contents and collapse to start/end
+                range.selectNodeContents(editable);
+                // collapse(false) -> end, collapse(true) -> start
+                range.collapse(!placeCaretAtEnd ? true : false);
+            }
+
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            // Tell app state that this index is focused
+            updateFocusedIndex(idx);
+        });
+      });
+    };
 
     const onKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
         const target = event.target as HTMLDivElement;
@@ -92,46 +166,43 @@ export const NumberedListNode = ({
             // Case 1: All text is selected, delete node and value
             if (isAllSelected) {
                 event.preventDefault();
-                removeNodeByIndex(index);
-                requestAnimationFrame(() => {
-                    const prevNode = document.querySelector(
-                        `[data-node-index="${index - 1}"] div[contenteditable]`
-                    ) as HTMLDivElement;
-                    if (prevNode) {
-                        prevNode.focus();
-                        // Optionally place caret at end
-                        const range = document.createRange();
-                        range.selectNodeContents(prevNode);
-                        range.collapse(false);
-                        const sel = window.getSelection();
-                        sel?.removeAllRanges();
-                        sel?.addRange(range);
-                        updateFocusedIndex(index - 1);
+                if (index === 0) {
+                    if (nodes.length > 1) {
+                        target.textContent = "";
+                        removeNodeByIndex(0);
+                        focusEditableAtIndex(0, false);
+                    } else {
+                        changeNodeValue(0, "");
+                        target.textContent = "";
                     }
-                });
+                    return;
+                }
+                removeNodeByIndex(index);
+                focusEditableAtIndex(index - 1, true);
                 return;
             }
 
             // Case 2: If node is empty
-            if (text.length === 0 || target.innerHTML === "<br>") {
+            if (text.trim().length === 0 || target.innerHTML === "<br>") {
                 event.preventDefault();
+
+                if (index === 0) {
+                    if (nodes.length > 1) {
+                        target.textContent = "";
+                        removeNodeByIndex(0);
+                        focusEditableAtIndex(0, false);
+                    } else {
+                        changeNodeValue(0, "");
+                        target.textContent = "";
+                    }
+                    return;
+                }
+
                 removeNodeByIndex(index);
 
-                requestAnimationFrame(() => {
-                    const prevNode = document.querySelector(
-                        `[data-node-index="${index - 1}"] div[contenteditable]`
-                    ) as HTMLDivElement;
-                    if (prevNode) {
-                        prevNode.focus();
-                        const range = document.createRange();
-                        range.selectNodeContents(prevNode);
-                        range.collapse(false);
-                        const sel = window.getSelection();
-                        sel?.removeAllRanges();
-                        sel?.addRange(range);
-                        updateFocusedIndex(index - 1);
-                    }
-                });
+                if (index > 0) {
+                    focusEditableAtIndex(index - 1, true);
+                }
                 return;
             }
 
@@ -139,45 +210,47 @@ export const NumberedListNode = ({
             else if (caretPos === 0 && index > 0) {
                 event.preventDefault();
 
-                const prevNode = document.querySelector(
-                    `[data-node-index="${index - 1}"] div[contenteditable]`
-                ) as HTMLDivElement;
-                const prevText = prevNode?.textContent || "";
+                if (text.trim().length === 0) {
+                    removeNodeByIndex(index);
+                    focusEditableAtIndex(index - 1, true);
+                    return; // stop here, don’t merge
+                }
 
+                const prevText = nodes?.[index - 1]?.value ?? "";
                 const mergedText = prevText + text;
-
                 changeNodeValue(index - 1, mergedText);
                 removeNodeByIndex(index);
-
-                const caretOffset = prevText.length;
 
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         const updatedPrev = document.querySelector(
-                            `[data-node-index="${index - 1}"] div[contenteditable]`
-                        ) as HTMLDivElement;
+                            `[data-node-index="${index - 1}"] [contenteditable]`
+                        ) as HTMLElement | null;
 
-                        if (updatedPrev) {
-                            const range = document.createRange();
-                            const sel = window.getSelection();
-
-                            const textNode = updatedPrev.firstChild;
-                            if (textNode) {
-                                range.setStart(textNode, Math.min(caretOffset, textNode.textContent?.length || 0));
-                                range.collapse(true);
-                                sel?.removeAllRanges();
-                                sel?.addRange(range);
-                            }
-
-                            updatedPrev.focus();
+                        if (!updatedPrev) {
                             updateFocusedIndex(index - 1);
+                            return;
                         }
+
+                        updatedPrev.focus();
+
+                        const range = document.createRange();
+                        range.selectNodeContents(updatedPrev);
+                        range.collapse(false);
+
+                        const sel = window.getSelection();
+                        sel?.removeAllRanges();
+                        sel?.addRange(range);
+
+                        updateFocusedIndex(index - 1);
                     });
                 });
+
                 return;
             }
         }
         if (event.key === "Enter") {
+            if (showCommandPanel) return;
             if (justChangedType) {
                 setJustChangedType(false);
                 return;

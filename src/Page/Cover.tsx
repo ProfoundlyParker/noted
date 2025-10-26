@@ -286,7 +286,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
                 filePath ? (
                     <FileImage className={styles.image} filePath={filePath} style={imageStyle} data-testid="cover-image" onMouseDown={onMouseDown} onTouchStart={onTouchStart} draggable={false} ref={imageRef} onLoad={onImageLoad} />
                 ) : (
-                    <img src="./src/Page/noted-cover.png" alt="Cover" className={styles.image} style={imageStyle} data-testid="cover-image" onMouseDown={onMouseDown} onTouchStart={onTouchStart} draggable={false} ref={imageRef} />
+                    <img src="./src/Page/noted-cover.png" alt="Cover" className={styles.image} style={imageStyle} data-testid="cover-image" onMouseDown={onMouseDown} onTouchStart={onTouchStart} draggable={false} ref={imageRef} onLoad={onImageLoad} />
                 )
             }
              {(!isMobile || showButtons) && !isRepositioning && (
@@ -313,7 +313,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
                 <button onClick={cancelReposition} data-testid="cancel">Cancel</button>
                 </div>
             )}
-            <input onChange={onCoverImageUpload} style={{ display: "none" }} ref={fileInputRef} type="file" />
+            <input onChange={onCoverImageUpload} style={{ display: "none" }} ref={fileInputRef} type="file" accept="image/*" />
         </div>
     )
 }
