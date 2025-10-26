@@ -106,8 +106,12 @@ export const Page = ({ node }: PageNodeProps) => {
     }, []);
 
     const handleBackClick = () => {
+        if (window.history.length <= 1) {
+            navigate("/");
+            return;
+        }
         navigate(-1);
-    }; 
+    };
 
     const fetchPageId = async () => {
         const slug = node?.value || id || "start";
