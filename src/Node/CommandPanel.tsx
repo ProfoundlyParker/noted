@@ -49,6 +49,8 @@ export const CommandPanel = ({ selectItem, nodeText }: CommandPanelProps) => {
                     setSelectedItemIndex(prevIndex => (prevIndex < supportedNodeTypes.length - 1 ? prevIndex + 1 : 0));
                     break;
                 case "Enter":
+                    event.preventDefault();
+                    event.stopPropagation();
                     selectItem(supportedNodeTypes[selectedItemIndex].value);
                     break;
                 default:
@@ -64,11 +66,28 @@ export const CommandPanel = ({ selectItem, nodeText }: CommandPanelProps) => {
     }, [selectedItemIndex, selectItem]);
 
     useEffect(() => {
-        const normalizedValue = nodeText.toLowerCase().replace(/\//, "");
-        setSelectedItemIndex(
-            supportedNodeTypes.findIndex((item) => item.value.match(normalizedValue))
-        )
-    }, [nodeText])
+        const normalizedValue = (nodeText || "")
+            .toLowerCase()
+            .replace(/\//g, "")        // remove slashes
+            .replace(/\u200B/g, "")    // remove zero-width spaces
+            .trim();                   // trim spaces
+
+        if (!normalizedValue) {
+            // default to first item (or keep existing behavior)
+            setSelectedItemIndex(0);
+            return;
+        }
+
+        // Searching by name and value
+        const idx = supportedNodeTypes.findIndex(item =>
+            item.value.toLowerCase().startsWith(normalizedValue) ||
+            item.name.toLowerCase().startsWith(normalizedValue) ||
+            item.value.toLowerCase().includes(normalizedValue) ||
+            item.name.toLowerCase().includes(normalizedValue)
+        );
+
+        setSelectedItemIndex(idx >= 0 ? idx : 0);
+    }, [nodeText]);
 
     return (
         <div ref={ref}
