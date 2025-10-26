@@ -32,11 +32,11 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     const nodeRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-    if (isCaptionEditing && captionInputRef.current) {
-        captionInputRef.current.style.height = "auto";
-        captionInputRef.current.style.height = captionInputRef.current.scrollHeight + "px";
-    }
-}, [caption, isCaptionEditing]);
+        if (isCaptionEditing && captionInputRef.current) {
+            captionInputRef.current.style.height = "auto";
+            captionInputRef.current.style.height = captionInputRef.current.scrollHeight + "px";
+        }
+    }, [caption, isCaptionEditing]);
 
     useEffect(() => {
     const getUser = async () => {
@@ -101,37 +101,37 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     };
 
     const updateNodeSizeInPage = async (pageId: string, nodeId: string, newWidth: number, newHeight: number) => {
-    const { data, error } = await supabase
-        .from("pages")
-        .select("nodes")
-        .eq("id", pageId)
-        .eq("created_by", userId)
-        .single();
+        const { data, error } = await supabase
+            .from("pages")
+            .select("nodes")
+            .eq("id", pageId)
+            .eq("created_by", userId)
+            .single();
 
-    if (error || !data) {
-        console.error("Error fetching page nodes:", error);
-        return;
-    }
+        if (error || !data) {
+            console.error("Error fetching page nodes:", error);
+            return;
+        }
 
-    const nodes: NodeData[] = data.nodes;
+        const nodes: NodeData[] = data.nodes;
 
-    const updatedNodes = nodes.map((n) =>
-        n.id === nodeId ? { ...n, width: newWidth, height: newHeight } : n
-    );
+        const updatedNodes = nodes.map((n) =>
+            n.id === nodeId ? { ...n, width: newWidth, height: newHeight } : n
+        );
 
-    const { error: updateError } = await supabase
-        .from("pages")
-        .update({ nodes: updatedNodes })
-        .eq("id", pageId)
-        .eq("created_by", userId);
+        const { error: updateError } = await supabase
+            .from("pages")
+            .update({ nodes: updatedNodes })
+            .eq("id", pageId)
+            .eq("created_by", userId);
 
-    if (updateError) {
-        console.error("Error updating node size:", updateError);
-    }
-};
+        if (updateError) {
+            console.error("Error updating node size:", updateError);
+        }
+    };
 
-const updateNodeCaptionInPage = async (pageId: string, nodeId: string, newCaption: string) => {
-    const { data, error } = await supabase
+    const updateNodeCaptionInPage = async (pageId: string, nodeId: string, newCaption: string) => {
+      const { data, error } = await supabase
         .from("pages")
         .select("nodes")
         .eq("id", pageId)
