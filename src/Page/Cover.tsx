@@ -313,7 +313,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
                 <button onClick={cancelReposition} data-testid="cancel">Cancel</button>
                 </div>
             )}
-            <input onChange={onCoverImageUpload} style={{ display: "none" }} ref={fileInputRef} type="file" />
+            <input onChange={onCoverImageUpload} style={{ display: "none" }} ref={fileInputRef} type="file" accept="image/*" />
         </div>
     )
 }
