@@ -23,6 +23,6 @@ This project is currently a work in progress. They key features can be seen belo
 
 ### Possible Future Improvements:
 
-- Unit + integration tests
+- Unit + integration tests (as of 8/25: already implemented with over 90% coverage)
 - Unsplash API integration to allow users to choose from stock photos
 - Page descriptions and/or tags
