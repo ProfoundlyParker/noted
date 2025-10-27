@@ -9,6 +9,7 @@ import { Loader } from "../components/Loader";
 import { supabase } from "../supabaseClient";
 import { Resizable } from "re-resizable";
 import { usePageId } from "../Page/PageIdContext";
+import { ErrorMessage } from "../Page/ErrorMessage";
 
 type ImageNodeProps = {
     node: NodeData;
@@ -28,6 +29,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     const [userId, setUserId] = useState<string | null>(null);
     const captionInputRef = useRef<HTMLTextAreaElement>(null);
     const [showButtons, setShowButtons] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const isMobile = window.innerWidth <= 650;
     const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -39,16 +41,26 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     }, [caption, isCaptionEditing]);
 
     useEffect(() => {
-    const getUser = async () => {
-        const { data, error } = await supabase.auth.getUser();
-        if (data?.user?.id) {
-        setUserId(data.user.id);
-        } else {
-        console.error("User not found:", error);
-        }
-    };
-    getUser();
+        const getUser = async () => {
+            try {
+                    const { data, error } = await supabase.auth.getUser();
+                    if (error || !data?.user?.id) throw error || new Error("User not found");
+                    setUserId(data.user.id);
+                } catch (err: any) {
+                    setErrorMessage("Failed to fetch user info");
+                }
+            };
+        getUser();
     }, []);
+
+    useEffect(() => {
+        if (!errorMessage) return;
+        const timer = setTimeout(() => {
+            setErrorMessage(null);
+        }, 15000);
+
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
     
     const onImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
         const target = event.target;
@@ -63,19 +75,16 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
         try {
             setLoading(true);
             const result = await uploadImage(file);
-            if (result?.filePath) {
-                changeNodeValue(index, result.filePath);
-                setImagePath(result.filePath);
-                await handleSaveCaption();
-            }
-        }
-        catch (error) {
-            changeNodeType(index, "text")
+            if (!result?.filePath) setErrorMessage("No file path returned");
+            changeNodeValue(index, result.filePath);
+            setImagePath(result.filePath);
+            await handleSaveCaption();
+        } catch (err: any) {
+            setErrorMessage("Failed to upload image");
+            changeNodeType(index, "text");
         } finally {
             setLoading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
+            if (fileInputRef.current) fileInputRef.current.value = "";
         }
         setCaption("");
     }
@@ -101,64 +110,56 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     };
 
     const updateNodeSizeInPage = async (pageId: string, nodeId: string, newWidth: number, newHeight: number) => {
-        const { data, error } = await supabase
-            .from("pages")
-            .select("nodes")
-            .eq("id", pageId)
-            .eq("created_by", userId)
-            .single();
+        if (!userId) return;
+        try {
+            const { data, error } = await supabase
+                .from("pages")
+                .select("nodes")
+                .eq("id", pageId)
+                .eq("created_by", userId)
+                .single();
+            if (error || !data) throw error || new Error("Page not found");
 
-        if (error || !data) {
-            console.error("Error fetching page nodes:", error);
-            return;
-        }
+            const nodes: NodeData[] = data.nodes;
+            const updatedNodes = nodes.map((n) =>
+                n.id === nodeId ? { ...n, width: newWidth, height: newHeight } : n
+            );
 
-        const nodes: NodeData[] = data.nodes;
-
-        const updatedNodes = nodes.map((n) =>
-            n.id === nodeId ? { ...n, width: newWidth, height: newHeight } : n
-        );
-
-        const { error: updateError } = await supabase
-            .from("pages")
-            .update({ nodes: updatedNodes })
-            .eq("id", pageId)
-            .eq("created_by", userId);
-
-        if (updateError) {
-            console.error("Error updating node size:", updateError);
+            const { error: updateError } = await supabase
+                .from("pages")
+                .update({ nodes: updatedNodes })
+                .eq("id", pageId)
+                .eq("created_by", userId);
+            if (updateError) throw updateError;
+        } catch (err: any) {
+            setErrorMessage("Failed to update image size");
         }
     };
 
     const updateNodeCaptionInPage = async (pageId: string, nodeId: string, newCaption: string) => {
-      const { data, error } = await supabase
-        .from("pages")
-        .select("nodes")
-        .eq("id", pageId)
-        .eq("created_by", userId)
-        .single();
+      if (!userId) return;
+        try {
+            const { data, error } = await supabase
+                .from("pages")
+                .select("nodes")
+                .eq("id", pageId)
+                .eq("created_by", userId)
+                .single();
+            if (error || !data) throw error || new Error("Page not found");
 
-        if (error || !data) {
-            console.error("Error fetching page nodes:", error);
+            const nodes: NodeData[] = data.nodes;
+            const updatedNodes = nodes.map((n) => n.id === nodeId ? { ...n, caption: newCaption } : n);
+
+            const { error: updateError } = await supabase
+                .from("pages")
+                .update({ nodes: updatedNodes })
+                .eq("id", pageId)
+                .eq("created_by", userId);
+            if (updateError) throw updateError;
+
             return;
-        }
-
-        const nodes: NodeData[] = data.nodes;
-
-        const updatedNodes = nodes.map((n) =>
-            n.id === nodeId ? { ...n, caption: newCaption } : n
-        );
-
-        const { error: updateError } = await supabase
-            .from("pages")
-            .update({ nodes: updatedNodes })
-            .eq("id", pageId)
-            .eq("created_by", userId);
-
-        if (updateError) {
-            console.error("Error updating node caption:", updateError);
-        } else {
-            return;
+        } catch (err: any) {
+            setErrorMessage("Failed to update caption");
         }
     };
 
@@ -307,6 +308,9 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                 accept="image/*"
                 style={{ display: "none" }}
             />
+            {errorMessage && (
+                <ErrorMessage message={errorMessage} onClose={() => setErrorMessage(null)} />
+            )}
         </div>
     )
 }
