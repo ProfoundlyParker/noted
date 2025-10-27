@@ -7,6 +7,7 @@ import cx from "classnames";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import styles from "./Node.module.css";
 import { FileImage } from "../components/FileImage";
+import { ErrorMessage } from "../Page/ErrorMessage";
 
 type PageNodeProps = {
     node: NodeData;
@@ -23,6 +24,7 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
     const [showPicker, setShowPicker] = useState(false);
     const pickerRef = useRef<HTMLDivElement>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
     const getUser = async () => {
@@ -55,41 +57,60 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         }
-    }, [isFocused, removeNodeByIndex, index, navigate, node])
+    }, [isFocused, removeNodeByIndex, index, navigate, node]);
+
+    useEffect(() => {
+        if (!errorMessage) return;
+        const timer = setTimeout(() => {
+            setErrorMessage(null);
+        }, 15000);
+
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
 
     useEffect(() => {
         if (!userId) return;
         const fetchPageData = async () => {
-            const { data } = await supabase
-                .from("pages")
-                .select("title, emoji, cover")
-                .eq("slug", node.value)
-                .eq("created_by", userId)
-                .single();
-            if (data) {
-                setPageTitle(data?.title);
-                setEmoji(data?.emoji || "📃");
-                setCover(data?.cover);
+            try {
+                const { data, error } = await supabase
+                    .from("pages")
+                    .select("title, emoji, cover")
+                    .eq("slug", node.value)
+                    .eq("created_by", userId)
+                    .single();
+
+                if (error) throw error;
+
+                if (data) {
+                    setPageTitle(data.title);
+                    setEmoji(data.emoji || "📃");
+                    setCover(data.cover);
+                }
+            } catch (err: any) {
+                setErrorMessage("Failed to load page data");
             }
         }
        fetchPageData();
     }, [node.type, node.value, userId]);
 
-    const handleEmojiClick = (emojiObject: EmojiClickData) => {
+    const handleEmojiClick = async (emojiObject: EmojiClickData) => {
         const selectedEmoji = emojiObject.emoji;
-        setEmoji(selectedEmoji);
-        if (selectedEmoji) {
+         if (!selectedEmoji || !node.value || !userId) return;
+
+        try {
+            const { error } = await supabase
+                .from("pages")
+                .update({ emoji: selectedEmoji })
+                .eq("slug", node.value)
+                .eq("created_by", userId);
+
+            if (error) throw error;
+
             setEmoji(selectedEmoji);
             setShowPicker(false);
-            if (node.value) {
-                supabase
-                    .from("pages")
-                    .update({ emoji: selectedEmoji })
-                    .eq("slug", node.value)
-                    .then(() => {
-                        console.log("Emoji updated successfully");
-                    })
-            }}
+        } catch (err: any) {
+            setErrorMessage("Failed to update emoji");
+        }
     };
 
     const handlePageClick = (e: React.MouseEvent) => {
@@ -104,21 +125,21 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
 
     const handleDeleteClick = async (e: React.MouseEvent) => {
             e.stopPropagation();
-            if (!node.value) return;
+            if (!node.value || !userId) return;
 
-            // Delete from Supabase
-            const { error } = await supabase
-                .from("pages")
-                .delete()
-                .eq("slug", node.value)
-                .eq("created_by", userId);
+            try {
+                const { error } = await supabase
+                    .from("pages")
+                    .delete()
+                    .eq("slug", node.value)
+                    .eq("created_by", userId);
 
-            if (error) {
-                alert("Failed to delete page.");
-                return;
+                if (error) throw error;
+
+                removeNodeByIndex(index);
+            } catch (err: any) {
+                setErrorMessage("Failed to delete page");
             }
-
-            removeNodeByIndex(index);
         };
 
     useEffect(() => {
@@ -175,6 +196,12 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
                         <path d="M9 3v1H4v2h1v13a2 2 0 002 2h10a2 2 0 002-2V6h1V4h-5V3H9zm2 2h2v1h-2V5zM7 8h2v10H7V8zm4 0h2v10h-2V8zm4 0h2v10h-2V8z" />
                     </svg>
                 </button>
+                {errorMessage && (
+                    <ErrorMessage 
+                        message={errorMessage} 
+                        onClose={() => setErrorMessage(null)} 
+                    />
+                )}
             </div>
         </div>
     )

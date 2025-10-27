@@ -2,6 +2,7 @@ import { FileImage } from "../components/FileImage";
 import { supabase } from "../supabaseClient";
 import { uploadImage } from "../utils/uploadImage";
 import styles from "./Cover.module.css";
+import { ErrorMessage } from "./ErrorMessage";
 import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 
 type CoverProps = {
@@ -23,6 +24,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
     const [containerHeight, setContainerHeight] = useState(0);
     const [userId, setUserId] = useState<string | null>(null);
     const [showButtons, setShowButtons] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const isMobile = window.innerWidth <= 650;
 
     useEffect(() => {
@@ -145,17 +147,24 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
     useEffect(() => {
         if (!pageId || !userId) return;
         const loadOffset = async () => {
-            const { data, error } = await supabase
-                .from("pages")
-                .select("cover_offset_y")
-                .eq("id", pageId)
-                .eq("created_by", userId)
-                .single();
-    
-            if (error) {
-                console.error("Failed to load cover offset:", error);
-            } else if (data) {
-                setOffsetY(data.cover_offset_y ?? 0);
+            try {
+                const { data, error } = await supabase
+                    .from("pages")
+                    .select("cover_offset_y")
+                    .eq("id", pageId)
+                    .eq("created_by", userId)
+                    .single();
+
+                if (error) {
+                    setErrorMessage("Failed to load cover position");
+                    return;
+                }
+
+                if (data) {
+                    setOffsetY(data.cover_offset_y ?? 0);
+                }
+            } catch (err: any) {
+                setErrorMessage("Unexpected error loading cover position");
             }
         };
     
@@ -182,6 +191,15 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
         return () => window.removeEventListener('resize', handleResize);
     }, [offsetY, imageHeight]);
 
+    useEffect(() => {
+        if (!errorMessage) return;
+        const timer = setTimeout(() => {
+            setErrorMessage(null);
+        }, 15000);
+
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
+
 
     const onImageLoad = () => {
         if (imageRef.current && containerRef.current) {
@@ -206,19 +224,24 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
         const target = event.target;
         const file = target?.files?.[0];
 
+        if (!file) return;
+
         try {
-            if (file) {
-                const result = await uploadImage(file);
-                changePageCover(result.filePath);
-                setOffsetY(0);
-                await supabase
-				.from("pages")
-				.update({ cover: result.filePath, cover_offset_y: 0 })
-				.eq("id", pageId)
+            const result = await uploadImage(file);
+
+            const { error } = await supabase
+                .from("pages")
+                .update({ cover: result.filePath, cover_offset_y: 0 })
+                .eq("id", pageId)
                 .eq("created_by", userId);
-            }
-        } catch (error) {
-            console.log("Error uploading cover image:", error)
+
+            if (error) throw error;
+
+            changePageCover(result.filePath);
+            setOffsetY(0);
+
+        } catch (error: any) {
+            setErrorMessage("Failed to upload cover image");
         }
     }
 
@@ -240,20 +263,20 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
         let clamped = tempOffsetY;
         const minOffset = Math.min(0, containerHeight - imageHeight);
         clamped = Math.max(minOffset, Math.min(clamped, 0));
+    
+        try {
+            const { error } = await supabase
+                .from("pages")
+                .update({ cover_offset_y: (clamped / imageHeight) * 100 })
+                .eq("id", pageId)
+                .eq("created_by", userId);
 
-    
-        setOffsetY((clamped / imageHeight) * 100);
-        setTempOffsetY(clamped);
-        setIsRepositioning(false);
-    
-        const { error } = await supabase
-            .from("pages")
-            .update({ cover_offset_y: (clamped / imageHeight) * 100 })
-            .eq("id", pageId)
-            .eq("created_by", userId);
-    
-        if (error) {
-            console.error("Failed to save cover offset:", error);
+            if (error) throw error;
+            setOffsetY((clamped / imageHeight) * 100);
+            setTempOffsetY(clamped);
+            setIsRepositioning(false);
+        } catch (error: any) {
+            setErrorMessage("Failed to save cover position");
         }
     };    
 
@@ -312,6 +335,9 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
                 <button onClick={saveReposition} data-testid="save">Save</button>
                 <button onClick={cancelReposition} data-testid="cancel">Cancel</button>
                 </div>
+            )}
+            {errorMessage && (
+                <ErrorMessage message={errorMessage} onClose={() => setErrorMessage(null)} />
             )}
             <input onChange={onCoverImageUpload} style={{ display: "none" }} ref={fileInputRef} type="file" accept="image/*" />
         </div>

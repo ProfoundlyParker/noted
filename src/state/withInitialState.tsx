@@ -5,6 +5,7 @@ import { supabase } from "../supabaseClient";
 import startPageScaffold from "./startPageScaffold.json";
 import styles from "../utils.module.css";
 import { Loader } from "../components/Loader";
+import { ErrorMessage } from "../Page/ErrorMessage";
 
 type InjectedProps = {
   initialState: Page;
@@ -24,6 +25,7 @@ export function withInitialState<TProps>(
     const [initialState, setInitialState] = useState<Page | null>();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | undefined>();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const inProgress = useRef(false)
 
     useEffect(() => {
@@ -31,51 +33,48 @@ export function withInitialState<TProps>(
         return
       }
       setIsLoading(true);
-      inProgress.current = true
+      inProgress.current = true;
       const fetchInitialState = async () => {
         try {
-          const { data: userData } = await supabase.auth.getUser();
-          const user = userData.user;
-          if (!user) {
-            throw new Error("User is not logged in");
-          }
-          const { data } = await supabase
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (userError || !userData?.user?.id) throw new Error("Failed to fetch user info");
+
+          const userId = userData.user.id;
+
+          const { data, error } = await supabase
             .from("pages")
             .select("title, id, cover, nodes, slug")
-            .match({ slug: pageSlug, created_by: user.id })
+            .match({ slug: pageSlug, created_by: userId });
+
+          if (error) throw error;
 
           if (data?.[0]) {
             setInitialState(data?.[0]);
             inProgress.current = false;
             setIsLoading(false);
-            return
-          }
-
-          if (pageSlug === "start") {
-            await supabase
+            return          
+          } 
+           if (pageSlug === "start") {
+            const { error: insertError } = await supabase
               .from("pages")
-              .insert({
-                ...startPageScaffold,
-                slug: "start",
-                created_by: user.id,
-              })
-
+              .insert({ ...startPageScaffold, slug: "start", created_by: userId });
             const { data } = await supabase
               .from("pages")
               .select("title, id, cover, nodes, slug")
-              .match({ slug: "start", created_by: user.id })
+              .match({ slug: "start", created_by: userId });
+            if (insertError) throw insertError;
 
             setInitialState(data?.[0]);
           } else {
-            setInitialState(data?.[0]);
+            setErrorMessage("Page not found");
           }
-        } catch (e) {
-          if (e instanceof Error) {
-            setError(e);
-          }
+        } catch (err: any) {
+          console.error(err);
+          setErrorMessage("Failed to load page data");
+        } finally {
+          inProgress.current = false;
+          setIsLoading(false);
         }
-        inProgress.current = false;
-        setIsLoading(false);
       };
       fetchInitialState();
     }, [pageSlug]);
@@ -89,7 +88,7 @@ export function withInitialState<TProps>(
     }
 
     if (error) {
-      return <div>{error.message}</div>;
+      {errorMessage && <ErrorMessage message={errorMessage} onClose={() => setErrorMessage(null)} />}
     }
 
     if (!initialState) {

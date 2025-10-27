@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { NodeData } from "../utils/types";
 import { PageIdContext } from "./PageIdContext";
 import { SortableNumberedListNode } from "../Node/SortableNumberedListNode";
+import { ErrorMessage } from "./ErrorMessage";
 
 type PageNodeProps = {
     node?: NodeData;
@@ -31,6 +32,7 @@ export const Page = ({ node }: PageNodeProps) => {
     const pickerRef = useRef<HTMLDivElement>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const nodeRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
     function getCaretCoordinates(): { x: number; y: number } | null {
@@ -94,16 +96,22 @@ export const Page = ({ node }: PageNodeProps) => {
     }
 
     useEffect(() => {
-    const getUser = async () => {
-        const { data, error } = await supabase.auth.getUser();
-        if (data?.user?.id) {
-        setUserId(data.user.id);
-        } else {
-        console.error("User not found:", error);
-        }
-    };
-    getUser();
+        const getUser = async () => {
+            const { data } = await supabase.auth.getUser();
+            if (data?.user?.id) {
+                setUserId(data.user.id);
+            } else {
+                setErrorMessage("User not found");
+            }
+        };
+        getUser();
     }, []);
+
+    useEffect(() => {
+        if (!errorMessage) return;
+        const timer = setTimeout(() => setErrorMessage(null), 15000);
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
 
     const handleBackClick = () => {
         if (window.history.length <= 1) {
@@ -125,7 +133,6 @@ export const Page = ({ node }: PageNodeProps) => {
                 .single();
 
             if (error) {
-                console.error('Error fetching page data:', error);
                 return;
             }
 
@@ -133,8 +140,8 @@ export const Page = ({ node }: PageNodeProps) => {
             if (data?.id) {
                 setNumericId(data.id);  // Assuming 'id' is an integer in your table
             }
-        } catch (err) {
-            console.error('Unexpected error:', err);
+        } catch (err: any) {
+            setErrorMessage("Unexpected error fetching page ID.");
         }
     };
 
@@ -146,30 +153,30 @@ export const Page = ({ node }: PageNodeProps) => {
             if (!slug) {
                 return;
             }
-            const { data: user } = await supabase.auth.getUser();
-    
             try {
+                const { data: userData, error: authError } = await supabase.auth.getUser();
+                if (authError) {
+                    setErrorMessage("Failed to fetch user data");
+                    return;
+                }
+
                 const { data, error } = await supabase
                     .from("pages")
                     .select("emoji, title")
                     .eq("slug", slug)
                     .eq("created_by", userId)
                     .single();
-    
+
                 if (error && error.code === "PGRST116") {
                     return;
                 }
-    
-                if (error) {
-                    return;
-                }
-    
+
                 if (data) {
                     setTitle(data.title || "Untitled Page");
                     setEmoji(data.emoji || "📃");
                 }
-            } catch (err) {
-                console.error("Unexpected error:", err);
+            } catch (err: any) {
+                setErrorMessage("Unexpected error fetching page data");
             }
         };
     
@@ -208,33 +215,41 @@ export const Page = ({ node }: PageNodeProps) => {
 
     const handleEmojiClick = async (emojiObject: EmojiClickData) => {
         const selectedEmoji = emojiObject.emoji;
-        setEmoji(selectedEmoji);
-        setShowPicker(false);
     
         const slug = node?.value || id || "start";
-        if (selectedEmoji && slug) {
-            const { error } = await supabase
+        if (!selectedEmoji || !slug || !userId) return;
+        try {
+            const { error: updateError } = await supabase
                 .from("pages")
                 .update({ emoji: selectedEmoji })
                 .eq("slug", slug)
                 .eq("created_by", userId);
-    
-            if (error) {
-                console.error("Error updating emoji:", error);
+
+            if (updateError) {
+                setErrorMessage("Failed to update emoji");
                 return;
             }
- 
-            const { data } = await supabase
+
+            const { data, error: fetchError } = await supabase
                 .from("pages")
                 .select("emoji, title")
                 .eq("slug", slug)
                 .eq("created_by", userId)
                 .single();
-    
+
+            if (fetchError) {
+                setErrorMessage("Failed to refresh page data");
+                return;
+            }
+
             if (data) {
                 setTitle(data.title);
                 setEmoji(data.emoji || "📃");
             }
+            setEmoji(selectedEmoji);
+            setShowPicker(false);
+        } catch (err: any) {
+            setErrorMessage("Unexpected error updating emoji");
         }
     };
     
@@ -266,8 +281,6 @@ export const Page = ({ node }: PageNodeProps) => {
     }
 
     const handleTitleChange = (newTitle: string) => {
-        setTitle(newTitle); 
-
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
         }
@@ -276,14 +289,19 @@ export const Page = ({ node }: PageNodeProps) => {
             const slug = node?.value || id || "start";
             if (!slug || !userId) return;
 
-            const { error } = await supabase
-                .from("pages")
-                .update({ title: newTitle })
-                .eq("slug", slug)
-                .eq("created_by", userId);
+            try {
+                const { error } = await supabase
+                    .from("pages")
+                    .update({ title: newTitle })
+                    .eq("slug", slug)
+                    .eq("created_by", userId);
 
-            if (error) {
-                console.error("Error saving title:", error);
+                if (error) {
+                    setErrorMessage("Failed to save page title");
+                }
+                setTitle(newTitle); 
+            } catch (err: any) {
+                setErrorMessage("Unexpected error saving page title");
             }
         }, 200);
     };
@@ -390,6 +408,9 @@ export const Page = ({ node }: PageNodeProps) => {
                     }}
                 />
         </div>
+        {errorMessage && (
+            <ErrorMessage message={errorMessage} onClose={() => setErrorMessage(null)} />
+        )}
         </PageIdContext.Provider>
         </>
     )
