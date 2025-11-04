@@ -5,6 +5,7 @@ import { supabase } from "../supabaseClient";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
+import { act } from "react";
 
 vi.mock("./AuthSessionContext", () => ({
   useAuthSession: vi.fn(),
@@ -120,5 +121,53 @@ describe("<Auth />", () => {
     await userEvent.click(button);
 
     expect(await screen.findByText(/string error/i)).toBeInTheDocument();
+  });
+  it("invokes setTimeout callback directly to clear email", async () => {
+    const setTimeoutSpy = vi.spyOn(global, "setTimeout");
+
+    mockedUseAuthSession.mockReturnValue({ session: null });
+    mockedSignInWithOtp.mockResolvedValue({ error: null });
+
+    render(<Auth />, { wrapper: MemoryRouter });
+
+    const input = screen.getByPlaceholderText("Your email") as HTMLInputElement;
+    const button = screen.getByRole("button", { name: /send login link/i });
+
+    await userEvent.type(input, "clearme@example.com");
+    await userEvent.click(button);
+
+    expect(await screen.findByText(/check your email/i)).toBeInTheDocument();
+
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 4000);
+    const scheduledCb = setTimeoutSpy.mock.calls.find((c) => c[1] === 4000)?.[0];
+    expect(typeof scheduledCb).toBe("function");
+
+    act(() => {
+      (scheduledCb as Function)();
+    });
+
+    await Promise.resolve();
+
+    expect(screen.queryByText(/check your email/i)).not.toBeInTheDocument();
+    expect(input.value).toBe("");
+
+    setTimeoutSpy.mockRestore();
+  });
+  it('sets unknown error message if signInError.message is missing', async () => {
+    mockedUseAuthSession.mockReturnValue({ session: null });
+
+    mockedSignInWithOtp.mockImplementation(() => {
+      throw {};
+    });
+
+    render(<Auth />, { wrapper: MemoryRouter });
+
+    const input = screen.getByPlaceholderText("Your email");
+    const button = screen.getByRole("button", { name: /send login link/i });
+
+    await userEvent.type(input, "test@example.com");
+    await userEvent.click(button);
+
+    expect(await screen.findByText("An unknown error occurred")).toBeInTheDocument();
   });
 });

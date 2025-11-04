@@ -103,4 +103,52 @@ describe('useFocusedNodeIndex', () => {
     )
     expect(result.current[0]).toBe(0)
   });
+  it('returns early if nodes or commandPanelRef missing', () => {
+    const { result } = renderHook(() =>
+      useFocusedNodeIndex({ nodes: null as any, commandPanelRef: null as any })
+    )
+    expect(result.current[0]).toBe(0)
+  })
+  it('increments and decrements focusedNodeIndex with Arrow keys', () => {
+    const nodes = [{id:1},{id:2},{id:3}]
+    const div = document.createElement('div')
+    const ref = { current: div } as React.RefObject<HTMLDivElement>
+
+    const { result } = renderHook(() =>
+      useFocusedNodeIndex({ nodes, commandPanelRef: ref })
+    )
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' })))
+    expect(result.current[0]).toBe(1)
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' })))
+    expect(result.current[0]).toBe(2)
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' })))
+    expect(result.current[0]).toBe(2)
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' })))
+    expect(result.current[0]).toBe(1)
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' })))
+    expect(result.current[0]).toBe(0)
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' })))
+    expect(result.current[0]).toBe(0)
+  })
+  it('does not change index if command panel is focused', () => {
+    const nodes = [{id:1},{id:2}]
+    const div = document.createElement('div')
+    document.body.appendChild(div)
+    div.tabIndex = 0
+    div.focus()
+    const ref = { current: div } as React.RefObject<HTMLDivElement>
+
+    const { result } = renderHook(() =>
+      useFocusedNodeIndex({ nodes, commandPanelRef: ref })
+    )
+
+    act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' })))
+    expect(result.current[0]).toBe(0)
+  })
 })

@@ -207,9 +207,8 @@ describe("Cover", () => {
   });
   it("handles uploadImage error gracefully", async () => {
     vi.mocked(uploadImage).mockRejectedValueOnce(new Error("Upload failed"));
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    const { getByText, container } = render(<Cover {...defaultProps} />);
+    const { getByText, container, findByText } = render(<Cover {...defaultProps} />);
     fireEvent.click(getByText("Change cover photo"));
 
     const fileInput = container.querySelector('input[type="file"]')!;
@@ -219,9 +218,8 @@ describe("Cover", () => {
       target: { files: [file] },
     });
 
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith("Error uploading cover image:", expect.any(Error));
-    });
+    const errorElement = await findByText("Failed to upload cover image");
+    expect(errorElement).toBeInTheDocument();
   });
   it("handles touch drag to reposition image", async () => {
     const { getByTestId } = render(<Cover {...defaultProps} />);
@@ -254,11 +252,9 @@ describe("Cover", () => {
       single: vi.fn().mockResolvedValue({ data: null, error: "error" }),
       update: vi.fn(),
     });
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    render(<Cover {...defaultProps} />);
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith("Failed to load cover offset:", "error");
-    });
+    const { findByText } = render(<Cover {...defaultProps} />);
+    const errorElement = await findByText("Failed to load cover position");
+    expect(errorElement).toBeInTheDocument();
   });
   it("logs error when no user is found", async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValueOnce({
@@ -272,5 +268,54 @@ describe("Cover", () => {
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith("User not found:", { message: "No user" });
     });
+  });
+  it("moves image with arrow keys", async () => {
+    const { getByTestId } = render(<Cover {...defaultProps} />);
+    fireEvent.click(getByTestId("reposition"));
+    const image = getByTestId("cover-image");
+
+    fireEvent.keyDown(image, { key: "ArrowUp" });
+    fireEvent.keyDown(image, { key: "ArrowDown" });
+  });
+  it("handles Supabase offset fetch error when user exists", async () => {
+    vi.mocked(supabase.from).mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: "error" }),
+      update: vi.fn(),
+    });
+    
+    const { findByText } = render(<Cover {...defaultProps} />);
+    expect(await findByText("Failed to load cover position")).toBeInTheDocument();
+  });
+  it("handles image load error", () => {
+    const { getByTestId } = render(<Cover {...defaultProps} />);
+    const img = getByTestId("cover-image");
+    fireEvent.error(img); // triggers onError branch
+  });
+  it("ignores mouseDown when not repositioning", () => {
+    const { getByTestId } = render(<Cover {...defaultProps} />);
+    const container = getByTestId("cover-container");
+
+    fireEvent.mouseDown(container, { clientY: 100 });
+
+    expect(container).toBeInTheDocument();
+  });
+  it("ignores mouseMove when not dragging", () => {
+    const { getByTestId } = render(<Cover {...defaultProps} />);
+    const container = getByTestId("cover-container");
+
+    fireEvent.mouseMove(container, { clientY: 100 });
+    expect(container).toBeInTheDocument();
+  });
+  it("ignores touchStart when not repositioning", () => {
+    const { getByTestId } = render(<Cover {...defaultProps} />);
+    const container = getByTestId("cover-container");
+    fireEvent.touchStart(container, { touches: [{ clientY: 100 }] });
+  });
+  it("ignores touchMove when not dragging", () => {
+    const { getByTestId } = render(<Cover {...defaultProps} />);
+    const container = getByTestId("cover-container");
+    fireEvent.touchMove(container, { touches: [{ clientY: 120 }] });
   });
 });

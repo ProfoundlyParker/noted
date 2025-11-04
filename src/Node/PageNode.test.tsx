@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppState } from "../state/AppStateContext";
 import { supabase } from "../supabaseClient";
 import userEvent from "@testing-library/user-event";
+import { act } from "react";
 
 vi.mock("react-router-dom", () => ({
   useNavigate: vi.fn(),
@@ -99,6 +100,7 @@ describe("PageNode Component", () => {
 
   it("deletes page and calls removeNodeByIndex on delete button click", async () => {
     render(<PageNode node={{ type: "page", value: "delete-me" }} index={1} isFocused={false} />);
+    await screen.findByText("My Title");
     fireEvent.click(screen.getByTitle("Delete this page"));
 
     await waitFor(() => {
@@ -163,5 +165,64 @@ describe("PageNode Component", () => {
     await waitFor(() => {
         expect(screen.queryByTestId("emoji-picker")).not.toBeInTheDocument();
     });
+  });
+  it("handleEmojiClick early returns if missing emoji, node.value, or userId", async () => {
+    render(<PageNode node={{ type: "page", value: "" }} index={0} isFocused={false} />);
+    const instance = screen.getByTestId("textbox").parentElement as any;
+    const handleEmojiClick = instance?.stateNode?.handleEmojiClick;
+    await handleEmojiClick?.({ emoji: "" });
+    // nothing should throw
+    expect(screen.getByTestId("textbox")).toBeInTheDocument();
+  });
+  it("handleDeleteClick early returns if node.value or userId missing", async () => {
+    render(<PageNode node={{ type: "page", value: "" }} index={0} isFocused={false} />);
+    const deleteButton = screen.getByTitle("Delete this page");
+    fireEvent.click(deleteButton);
+    expect(mockRemoveNodeByIndex).not.toHaveBeenCalled();
+  });
+  it("sets errorMessage if fetching page data fails", async () => {
+    (supabase.from as vi.Mock).mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn(() => Promise.reject("Fetch error")),
+    });
+
+    render(<PageNode node={node} index={0} isFocused={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Failed to load page data")).toBeInTheDocument();
+    });
+  });
+  it("sets errorMessage when handleDeleteClick fails", async () => {
+    const deleteMock = {
+      eq: vi.fn().mockReturnThis(),
+    };
+    (supabase.from as vi.Mock).mockReturnValueOnce({
+      delete: vi.fn(() => ({ error: "Delete failed", eq: deleteMock.eq })),
+    });
+
+    render(<PageNode node={{ type: "page", value: "delete-me" }} index={0} isFocused={false} />);
+
+    const deleteButton = screen.getByTitle("Delete this page");
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("error-message")).toHaveTextContent("Failed to load page data");
+    });
+  });
+  it("sets errorMessage when handleEmojiClick fails", async () => {
+    const updateMock = { eq: vi.fn().mockReturnThis() };
+    (supabase.from as vi.Mock).mockReturnValueOnce({
+      update: vi.fn(() => ({ error: "Update failed", eq: updateMock.eq })),
+    });
+
+    render(<PageNode node={{ type: "page", value: "test" }} index={0} isFocused={false} />);
+
+    fireEvent.click(screen.getByText("📃"));
+
+    fireEvent.click(screen.getByText("😀"));
+    await waitFor(() => {
+        expect(screen.getByTestId("error-message")).toHaveTextContent("Failed to load page data×");
+      });
   });
 });

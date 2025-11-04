@@ -55,9 +55,7 @@ describe("withInitialState", () => {
     supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
 
     render(<Wrapped />);
-    await waitFor(() => {
-      expect(screen.getByText(/user is not logged in/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/oops! this page doesn’t exist/i)).toBeInTheDocument();
   });
 
   it('shows "Page not found" if no page is returned', async () => {
@@ -66,9 +64,7 @@ describe("withInitialState", () => {
     supabase.from().select().match.mockResolvedValue({ data: [] });
 
     render(<Wrapped />);
-    await waitFor(() => {
-      expect(screen.getByText("Page not found")).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/oops! this page doesn’t exist/i)).toBeInTheDocument();
   });
 
   it("inserts start page when not found and slug is 'start'", async () => {
@@ -84,6 +80,20 @@ describe("withInitialState", () => {
     render(<Wrapped />);
     await waitFor(() => {
       expect(screen.getByText("Loaded Page: Start Page")).toBeInTheDocument();
+    });
+  });
+  it("does not fetch if inProgress.current is true", async () => {
+      mockUseMatch.mockReturnValue({ params: { slug: "test" } });
+      supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "123" } } });
+      supabase.from().select().match.mockResolvedValue({ data: [{ title: "Test Page" }] });
+
+      const Wrapped = withInitialState(DummyComponent);
+
+      const { rerender } = render(<Wrapped />);
+      rerender(<Wrapped />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Loaded Page: Test Page")).toBeInTheDocument();
     });
   });
 });

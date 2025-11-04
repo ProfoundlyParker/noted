@@ -47,20 +47,17 @@ describe('BasicNode', () => {
     const { getByText } = render(<BasicNode {...baseProps} />)
     expect(getByText('hello')).toBeInTheDocument()
   })
-
   it('shows command panel if value starts with "/" and isFocused', () => {
     const { getByTestId } = render(
       <BasicNode {...baseProps} node={{ ...baseProps.node, value: '/text' }} isFocused />
     )
     expect(getByTestId('command-panel')).toBeInTheDocument()
   })
-
   it('calls updateFocusedIndex on click', () => {
     const { getByRole } = render(<BasicNode {...baseProps} />)
     fireEvent.click(getByRole('textbox'))
     expect(mockUpdateFocusedIndex).toHaveBeenCalledWith(0)
   })
-
   it('calls changeNodeValue on input', () => {
     const { getByRole } = render(<BasicNode {...baseProps} isFocused />)
     const editable = getByRole('textbox')
@@ -68,7 +65,6 @@ describe('BasicNode', () => {
     fireEvent.input(editable)
     expect(mockChangeNodeValue).toHaveBeenCalledWith(0, 'new text')
   })
-
   it('splits node on Enter at end of content', () => {
         const { getByRole } = render(<BasicNode {...baseProps} isFocused />)
         const editable = getByRole('textbox')
@@ -92,7 +88,6 @@ describe('BasicNode', () => {
         expect(typeof callArgs[0].value).toBe('string')
         expect(callArgs[0].id).toBeDefined()
     })
-
     it('removes node on Backspace if empty', () => {
         const emptyNode = { ...baseProps.node, value: '' }
         const { getByRole } = render(<BasicNode {...baseProps} isFocused node={emptyNode} />)
@@ -135,7 +130,6 @@ describe('BasicNode', () => {
         
         expect(document.activeElement).toBe(editable)
     })
-
     it('updates textContent when node.value changes externally', () => {
         const { getByRole, rerender } = render(<BasicNode {...baseProps} node={{ ...baseProps.node, value: 'hello' }} />)
         const editable = getByRole('textbox')
@@ -144,7 +138,6 @@ describe('BasicNode', () => {
         rerender(<BasicNode {...baseProps} node={{ ...baseProps.node, value: 'updated' }} />)
         expect(editable.textContent).toBe('updated')
     })
-
     it('blurs editable div when isFocused becomes false and div is focused', () => {
         const { getByRole, rerender } = render(<BasicNode {...baseProps} isFocused={true} />)
         const editable = getByRole('textbox')
@@ -187,7 +180,6 @@ describe('BasicNode', () => {
         expect(mockAddNode).not.toHaveBeenCalled();
         expect(mockChangeNodeValue).not.toHaveBeenCalled();
     });
-
     it('adds node at current index if caret at 0 on Enter', () => {
         const { getByRole } = render(<BasicNode {...baseProps} isFocused />)
         const editable = getByRole('textbox')
@@ -204,7 +196,6 @@ describe('BasicNode', () => {
 
         expect(mockAddNode).toHaveBeenCalledWith(expect.objectContaining({ type: 'text', value: '' }), 0)
     })
-
     it('adds node at next index if caret at end on Enter', () => {
         mockAddNode.mockClear();
 
@@ -236,7 +227,6 @@ describe('BasicNode', () => {
             1
         );
     });
-
     it('splits node on Enter if caret in middle', () => {
         const { getByRole } = render(<BasicNode {...baseProps} isFocused />)
         const editable = getByRole('textbox')
@@ -267,8 +257,7 @@ describe('BasicNode', () => {
 
         fireEvent.keyDown(editable, { key: 'Backspace' })
         expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(0)
-        })
-
+    })
     it('removes node on Backspace if node is empty', () => {
         const emptyNode = { ...baseProps.node, value: '' }
         const { getByRole } = render(<BasicNode {...baseProps} isFocused node={emptyNode} />)
@@ -278,7 +267,6 @@ describe('BasicNode', () => {
         fireEvent.keyDown(editable, { key: 'Backspace' })
         expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(0)
     })
-
     it('merges with previous node on Backspace if caret at start', () => {
         document.body.innerHTML = `
             <div data-node-index="0">prev</div>
@@ -309,8 +297,6 @@ describe('BasicNode', () => {
 
         expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(1)
     })
-
-
     it('does nothing on Backspace if partial selection', () => {
         mockChangeNodeValue.mockClear()
         mockRemoveNodeByIndex.mockClear()
@@ -372,8 +358,6 @@ describe('BasicNode', () => {
         expect(mockChangeNodeValue).toHaveBeenCalledWith(0, 'helloworld')
         expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(1)
     })
-
-
     it('does nothing on Delete if caret not at end', async () => {
         mockChangeNodeValue.mockClear()
         mockRemoveNodeByIndex.mockClear()
@@ -538,5 +522,52 @@ describe('BasicNode', () => {
 
         expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(1)
         expect(mockUpdateFocusedIndex).toHaveBeenCalledWith(0)
+    });
+    it('calls placeCaretAtEnd with el.lastChild when deleting entire node', () => {
+        document.body.innerHTML = `
+            <div data-node-index="0">prev text</div>
+            <div data-node-index="1" contenteditable="true">current</div>
+        `;
+        const { getByTestId } = render(
+            <BasicNode {...baseProps} index={1} isFocused node={{ ...baseProps.node, value: 'current' }} />
+        );
+        const editable = getByTestId('editable-1');
+        editable.focus();
+
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+
+        fireEvent.keyDown(editable, { key: 'Backspace' });
+
+        expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(1);
+    });
+    it('moves caret to previous node when deleting current node with Backspace', async () => {
+        document.body.innerHTML = `
+            <div data-node-index="0">prev</div>
+            <div data-node-index="1" contenteditable="true">current</div>
+        `;
+
+        const { getByTestId } = render(
+            <BasicNode {...baseProps} index={1} isFocused node={{ ...baseProps.node, value: 'current' }} />
+        );
+
+        const editable = getByTestId('editable-1');
+        editable.focus();
+
+        const range = document.createRange();
+        range.selectNodeContents(editable);
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+
+        fireEvent.keyDown(editable, { key: 'Backspace' });
+
+        await act(() => Promise.resolve());
+
+        expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(1);
+        expect(mockUpdateFocusedIndex).toHaveBeenCalledWith(0);
     });
 })
