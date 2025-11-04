@@ -37,4 +37,11 @@ describe('usePageId', () => {
     expect(error).toBeInstanceOf(Error);
     expect(error.message).toBe('usePageId must be used within a PageIdProvider');
   });
+  it('throws error if used outside provider', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => render(<TestComponent />)).toThrow(
+      "usePageId must be used within a PageIdProvider"
+    );
+    consoleSpy.mockRestore();
+  });
 });

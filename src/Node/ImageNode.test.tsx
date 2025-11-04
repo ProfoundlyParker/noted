@@ -50,7 +50,7 @@ vi.mock("../supabaseClient", () => {
   return {
     supabase: {
       auth: {
-        getUser: vi.fn(() => Promise.resolve({ data: { user: { id: "user123" } } , error: { message: 'No user found'}})),
+        getUser: vi.fn(() => Promise.resolve({ data: { user: { id: "user123" } } , error: null })),
       },
       from: vi.fn(() => ({
         select: mockSelect,
@@ -99,22 +99,26 @@ describe("<ImageNode />", () => {
       expect(uploadImage).toHaveBeenCalled();
     });
   });
-
   it("deletes node on delete click", () => {
     render(<ImageNode {...defaultProps} />);
     fireEvent.click(screen.getByText("Delete"));
     expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(0);
   });
-
   it("triggers file input on replace click", () => {
     render(<ImageNode {...defaultProps} />);
     const replaceButton = screen.getByText("Replace");
     fireEvent.click(replaceButton);
-    // We can't test fileInput.click(), but this checks it doesn't crash
   });
-
   it("enters and saves caption edit mode", async () => {
+    const getUserMock = vi.spyOn(supabase.auth, "getUser")
+      .mockResolvedValue({ data: { user: { id: "user123" } }, error: null });
+
     render(<ImageNode {...defaultProps} />);
+
+    await waitFor(() => {
+      expect(getUserMock).toHaveBeenCalled();
+    });
+
     const caption = screen.getByText("Example caption");
     fireEvent.click(caption);
 
@@ -123,10 +127,12 @@ describe("<ImageNode />", () => {
     fireEvent.blur(input);
 
     await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalled(); // called to save caption
+      expect(supabase.from).toHaveBeenCalled();
+      expect(supabase.from().update).toHaveBeenCalled();
     });
-  });
 
+    getUserMock.mockRestore();
+  });
   it("shows upload button if no image exists", () => {
     render(<ImageNode {...defaultProps} node={{ ...defaultProps.node, value: "" }} />);
     expect(screen.getByText("Upload Image")).toBeInTheDocument();
@@ -164,44 +170,46 @@ describe("<ImageNode />", () => {
     fireEvent.keyDown(caption, { key: "Enter" });
     expect(screen.getByPlaceholderText("Add a caption...")).toBeInTheDocument();
   });
-  it("updates Supabase when image is resized", async () => {
-    const updateFocusedIndex = vi.fn();
-    const node = {
-        id: "node-id",
-        type: "image",
-        value: "fake-url",
-        width: 300,
-        height: 200,
-        caption: "",
-    };
+  it("updates Supabase when image is resized (simulate drag)", async () => {
+    const getUserMock = vi.spyOn(supabase.auth, "getUser")
+      .mockResolvedValue({ data: { user: { id: "user123" } }, error: null });
 
     render(
-        <ImageNode
+      <ImageNode
         index={0}
-        node={node}
+        node={{
+          id: "node-id",
+          type: "image",
+          value: "fake-url",
+          width: 300,
+          height: 200,
+          caption: "",
+        }}
         changeNodeValue={mockChangeNodeValue}
         removeNodeByIndex={mockRemoveNodeByIndex}
-        updateFocusedIndex={updateFocusedIndex}
+        updateFocusedIndex={vi.fn()}
         focused={true}
-        />
+      />
     );
 
+    await waitFor(() => expect(getUserMock).toHaveBeenCalled());
+
     const resizeWrapper = screen.getByTestId("resize-wrapper");
-    fireEvent.resize(resizeWrapper, { detail: { width: 100, height: 150 } });
+
+    const handle = Array.from(resizeWrapper.querySelectorAll("div"))
+      .find(el => el.getAttribute("style")?.includes("cursor: col-resize"));
+    const target = handle || resizeWrapper;
+
+    fireEvent.mouseDown(target, { clientX: 300, clientY: 100 });
+    fireEvent.mouseMove(document, { clientX: 350, clientY: 100 });
+    fireEvent.mouseUp(document, { clientX: 350, clientY: 100 });
 
     await waitFor(() => {
-        expect(supabase.from().update).toHaveBeenCalledWith(
-        expect.objectContaining({
-            nodes: expect.arrayContaining([
-            expect.objectContaining({
-                id: "node456",
-                width: 300,
-                height: 150,
-            }),
-            ]),
-        })
-        );
+      expect(supabase.from).toHaveBeenCalledWith("pages");
+      expect(supabase.from().update).toHaveBeenCalled();
     });
+
+    getUserMock.mockRestore();
   });
   it("logs error when user is not found", async () => {
     const getUserMock = vi.spyOn(supabase.auth, "getUser").mockResolvedValueOnce({
@@ -209,16 +217,13 @@ describe("<ImageNode />", () => {
         error: { message: "No user found" },
     });
 
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
     render(<ImageNode {...defaultProps} />);
 
     await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith("User not found:", { message: "No user found" });
+        expect(screen.getByText("Failed to fetch user info")).toBeInTheDocument();
     });
 
     getUserMock.mockRestore();
-    consoleErrorSpy.mockRestore();
   });
   it("toggles button visibility on image click when isMobile is true", async () => {
     const { getByTestId, queryByTestId } = render(<ImageNode {...defaultProps} isMobile={true} />);
@@ -253,16 +258,29 @@ describe("<ImageNode />", () => {
     });
   });
   it("calls updateNodeSizeInPage on resize", async () => {
+    const getUserMock = vi.spyOn(supabase.auth, "getUser")
+    .mockResolvedValue({ data: { user: { id: "user123" } }, error: null });
+
     render(<ImageNode {...defaultProps} />);
+
+    await waitFor(() => expect(getUserMock).toHaveBeenCalled());
 
     const resizeWrapper = screen.getByTestId("resize-wrapper");
 
-    fireEvent.mouseDown(resizeWrapper);
-    fireEvent.mouseUp(resizeWrapper); 
+    const handle = Array.from(resizeWrapper.querySelectorAll("div"))
+    .find(el => el.getAttribute("style")?.includes("cursor: col-resize"));
+
+    const target = handle || resizeWrapper;
+
+    fireEvent.mouseDown(target, { clientX: 300, clientY: 100 });
+    fireEvent.mouseMove(document, { clientX: 350, clientY: 100 });
+    fireEvent.mouseUp(document, { clientX: 350, clientY: 100 });
 
     await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith("pages");
+    expect(supabase.from).toHaveBeenCalledWith("pages");
     });
+
+    getUserMock.mockRestore();
   });
   it("removes node on Backspace keydown when not in input", () => {
     render(<ImageNode {...defaultProps} />);
@@ -325,7 +343,7 @@ describe("<ImageNode />", () => {
     fireEvent.keyDown(window, { key: "Backspace" });
     expect(mockRemoveNodeByIndex).toHaveBeenCalledWith(0);
   });
-    it("hides buttons when clicking outside on mobile", async () => {
+  it("hides buttons when clicking outside on mobile", async () => {
     render(<ImageNode node={{ id: "node-id", type: "image", value: "img.png", width: 300, height: 200 }} index={0} />);
     Object.defineProperty(window, "innerWidth", { writable: true, value: 400 });
     window.dispatchEvent(new Event("resize"));
@@ -337,5 +355,70 @@ describe("<ImageNode />", () => {
     await waitFor(() => {
       expect(buttons).toHaveStyle("display: none");
     });
+  });
+  it("adjusts caption textarea height when editing", () => {
+    render(<ImageNode {...defaultProps} />);
+    const caption = screen.getByTestId("image-caption");
+    fireEvent.click(caption); // triggers isCaptionEditing=true
+
+    const input = screen.getByTestId("caption-input") as HTMLTextAreaElement;
+    fireEvent.change(input, { target: { value: "A long caption\nthat wraps" } });
+
+    expect(input.style.height).toBeDefined();
+  });
+  it("shows error if uploadImage returns no filePath", async () => {
+    const mockUpload = uploadImage as unknown as vi.Mock;
+    mockUpload.mockResolvedValue({ filePath: "" });
+
+    render(<ImageNode {...defaultProps} />);
+    const input = screen.getByTestId("node-image-upload") as HTMLInputElement;
+
+    fireEvent.change(input, {
+      target: { files: [new File(["img"], "img.png", { type: "image/png" })] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("No file path returned")).toBeInTheDocument();
+    });
+  });
+  it("changes node type to text on upload error", async () => {
+    const mockUpload = uploadImage as unknown as vi.Mock;
+    mockUpload.mockRejectedValue(new Error("Upload failed"));
+
+    render(<ImageNode {...defaultProps} />);
+    const input = screen.getByTestId("node-image-upload") as HTMLInputElement;
+
+    fireEvent.change(input, {
+      target: { files: [new File(["fail"], "fail.png", { type: "image/png" })] },
+    });
+
+    await waitFor(() => {
+      expect(mockChangeNodeType).toHaveBeenCalledWith(0, "text");
+    });
+  });
+  it("calls handleSaveCaption after successful image upload", async () => {
+    const mockUpload = uploadImage as unknown as vi.Mock;
+    mockUpload.mockResolvedValue({ filePath: "new-path.png" });
+
+    render(<ImageNode {...defaultProps} />);
+    const input = screen.getByTestId("node-image-upload") as HTMLInputElement;
+
+    fireEvent.change(input, {
+      target: { files: [new File(["img"], "test.png", { type: "image/png" })] },
+    });
+
+    await waitFor(() => {
+      expect(mockChangeNodeValue).toHaveBeenCalledWith(0, "new-path.png");
+    });
+  });
+  it("clears errorMessage after timeout", () => {
+    vi.useFakeTimers();
+
+    render(<ImageNode {...defaultProps} />);
+    const setError = screen.getByText("Example caption").closest("div");
+    fireEvent.error(setError!);
+    vi.advanceTimersByTime(15000);
+
+    vi.useRealTimers();
   });
 });

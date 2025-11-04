@@ -78,4 +78,20 @@ describe('CommandPanel component', () => {
 
     expect(setIsCommandPanelOpen).toHaveBeenCalledWith(false);
   });
+  it("does nothing for unhandled keys (default case)", () => {
+    render(<CommandPanel selectItem={mockSelectItem} nodeText="" />);
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(mockSelectItem).not.toHaveBeenCalled();
+  });
+  it("sets selected index to matched item when nodeText matches", () => {
+    render(<CommandPanel selectItem={mockSelectItem} nodeText="/image" />);
+    const imageItem = screen.getByText("Image");
+    expect(imageItem.className).toMatch(/selected/);
+  });
+  it("sets selected index to 0 when nodeText does not match", () => {
+    render(<CommandPanel selectItem={mockSelectItem} nodeText="/nomatch" />);
+    const firstItem = screen.getByText("Text"); // first item
+    expect(firstItem.className).toMatch(/selected/);
+  });
 });
