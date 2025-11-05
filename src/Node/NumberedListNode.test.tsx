@@ -803,4 +803,24 @@ describe("NumberedListNode", () => {
     vi.runAllTimers();
     expect(mockAddNode).not.toHaveBeenCalled();
   });
+  it("handles empty contenteditable textContent correctly", () => {
+    render(<NumberedListNode {...baseProps} />);
+    const editable = screen.getByTestId("editable");
+    
+    act(() => {
+      editable.textContent = "";
+    });
+
+    fireEvent.input(editable);
+
+    expect(mockChangeNodeValue).toHaveBeenCalledWith(0, "");
+  });
+  it("handles Enter key when value starts with / but command panel not visible", () => {
+    render(<NumberedListNode {...baseProps} node={{ ...baseProps.node, value: "/test" }} isFocused />);
+    const editable = screen.getByText("/test");
+
+    fireEvent.keyDown(editable, { key: "Enter" });
+
+    expect(mockAddNode).not.toHaveBeenCalled();
+  });
 });

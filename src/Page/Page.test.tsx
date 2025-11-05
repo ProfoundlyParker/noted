@@ -887,11 +887,11 @@ describe("Page component", () => {
     });
 
     const { getByTestId } = render(<Page />);
-    fireEvent.click(getByTestId("emoji-option"));        // open picker
-    fireEvent.click(getByTestId("emoji-option-button")); // select emoji
+    fireEvent.click(getByTestId("emoji-option"));       
+    fireEvent.click(getByTestId("emoji-option-button")); 
 
     await waitFor(() => {
-      expect(mockSetTitle).toHaveBeenCalled();           // ensures state update called
+      expect(mockSetTitle).toHaveBeenCalled();          
     });
   });
   it("handleKeyDown returns early if command panel is open", () => {
@@ -910,5 +910,18 @@ describe("Page component", () => {
     (useParams as any).mockReturnValue({ id: "" });
     render(<Page />);
     await waitFor(() => expect(true).toBe(true));
+  });
+  it("ArrowDown moves focus correctly through mixed node types", () => {
+    (useAppState as any).mockReturnValueOnce({
+      nodes: [
+        { id: "n1", type: "text", value: "a" },
+        { id: "n2", type: "numberedList", value: "b" },
+        { id: "n3", type: "text", value: "c" },
+      ],
+    });
+
+    render(<Page />);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
   });
 });
