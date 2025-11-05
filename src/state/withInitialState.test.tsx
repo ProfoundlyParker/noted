@@ -96,4 +96,22 @@ describe("withInitialState", () => {
         expect(screen.getByText("Loaded Page: Test Page")).toBeInTheDocument();
     });
   });
+  it("skips fetching data if inProgress.current is already true", async () => {
+    mockUseMatch.mockReturnValue({ params: { slug: "skip" } });
+
+    supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "123" } } });
+    supabase.from().select().match.mockResolvedValue({ data: [{ title: "Should Not Load" }] });
+
+    const WrappedInner = withInitialState(DummyComponent);
+
+    const fromSpy = vi.spyOn(supabase, "from");
+
+    const { container } = render(<WrappedInner />);
+    const instance = container.firstChild as any;
+    (instance as any)?.inProgress && ((instance as any).inProgress.current = true);
+
+    await waitFor(() => {
+      expect(fromSpy).not.toHaveBeenCalled();
+    });
+  });
 });

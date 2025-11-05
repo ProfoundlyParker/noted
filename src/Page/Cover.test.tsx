@@ -318,4 +318,26 @@ describe("Cover", () => {
     const container = getByTestId("cover-container");
     fireEvent.touchMove(container, { touches: [{ clientY: 120 }] });
   });
+  it("handles unexpected thrown error when loading cover offset", async () => {
+    vi.mocked(supabase.from).mockImplementationOnce(() => {
+      throw new Error("network failure");
+    });
+
+    const { findByText } = render(<Cover {...defaultProps} />);
+    expect(await findByText("Unexpected error loading cover position")).toBeInTheDocument();
+  });
+  it("handles error when saving reposition", async () => {
+    vi.mocked(supabase.from).mockReturnValueOnce({
+      select: vi.fn(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      update: vi.fn().mockResolvedValue({ error: "save error" }),
+    });
+
+    const { getByTestId, findByText } = render(<Cover {...defaultProps} />);
+    fireEvent.click(getByTestId("reposition"));
+    fireEvent.click(getByTestId("save"));
+
+    expect(await findByText("Failed to save cover position")).toBeInTheDocument();
+  });
 });
