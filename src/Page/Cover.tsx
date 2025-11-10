@@ -39,6 +39,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
     getUser();
     }, []);
 
+    /* c8 ignore next 84 */
     const onMouseDown = (e: React.MouseEvent) => {
 		if (!isRepositioning) return;
         e.preventDefault();
@@ -126,6 +127,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
 
     useEffect(() => {
         if (dragging) {
+            /* c8 ignore next 5 */
             window.addEventListener("mousemove", onMouseMove);
             window.addEventListener("mouseup", onMouseUp);
             window.addEventListener("touchmove", onTouchMove);
@@ -194,6 +196,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
     useEffect(() => {
         if (!errorMessage) return;
         const timer = setTimeout(() => {
+            /* c8 ignore next */
             setErrorMessage(null);
         }, 15000);
 

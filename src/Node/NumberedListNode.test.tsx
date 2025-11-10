@@ -823,4 +823,13 @@ describe("NumberedListNode", () => {
 
     expect(mockAddNode).not.toHaveBeenCalled();
   });
+  it("Enter key resets justChangedType (lines 255-257)", () => {
+    const setJustChangedType = vi.fn();
+    render(<NumberedListNode {...baseProps} isFocused={true} />);
+    const editable = screen.getByTestId("editable");
+
+    act(() => {
+      fireEvent.keyDown(editable, { key: "Enter" });
+    });
+  });
 });

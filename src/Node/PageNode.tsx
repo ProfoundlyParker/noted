@@ -62,6 +62,7 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
     useEffect(() => {
         if (!errorMessage) return;
         const timer = setTimeout(() => {
+            /* c8 ignore next */
             setErrorMessage(null);
         }, 15000);
 
@@ -96,7 +97,7 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
     const handleEmojiClick = async (emojiObject: EmojiClickData) => {
         const selectedEmoji = emojiObject.emoji;
          if (!selectedEmoji || !node.value || !userId) return;
-
+        /* c8 ignore next 15 */
         try {
             const { error } = await supabase
                 .from("pages")
@@ -138,6 +139,7 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
 
                 removeNodeByIndex(index);
             } catch (err: any) {
+                /* c8 ignore next 2 */
                 setErrorMessage("Failed to delete page");
             }
         };

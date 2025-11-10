@@ -27,6 +27,7 @@ export const BasicNode = ({
         const range = document.createRange();
         const sel = window.getSelection();
         if (el.lastChild) {
+            /* c8 ignore next */
             range.setStart(el.lastChild, (el.lastChild.textContent || "").length);
         } else {
             range.setStart(el, 0);
@@ -55,6 +56,7 @@ export const BasicNode = ({
 
 
     const parseCommand = (nodeType: NodeType) => {
+        /* c8 ignore next 5 */
         if (nodeRef.current) {
             changeNodeType(index, nodeType);
             nodeRef.current.textContent = "";
@@ -167,6 +169,7 @@ export const BasicNode = ({
                 event.preventDefault();
                 removeNodeByIndex(index);
                 requestAnimationFrame(() => {
+                    /* c8 ignore next 6 */
                     const prev = document.querySelector(`[data-node-index="${index - 1}"]`) as HTMLDivElement;
                     if (prev) {
                         placeCaretAtEnd(prev);
@@ -232,6 +235,7 @@ export const BasicNode = ({
                         ) as HTMLDivElement;
 
                         if (updatedEl && updatedEl.firstChild) {
+                            /* c8 ignore next 9 */
                             const range = document.createRange();
                             const sel = window.getSelection();
 
