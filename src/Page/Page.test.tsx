@@ -924,4 +924,31 @@ describe("Page component", () => {
     fireEvent.keyDown(window, { key: "ArrowDown" });
     fireEvent.keyDown(window, { key: "ArrowDown" });
   });
+  it("navigates to home when history length <= 1", async () => {
+    Object.defineProperty(window, "history", { value: { length: 1 } });
+    const navigate = vi.fn();
+    (useNavigate as any).mockReturnValue(navigate);
+
+    const { getByText } = render(<Page />);
+    fireEvent.click(getByText("Previous Page"));
+    expect(navigate).toHaveBeenCalledWith("/");
+  });
+  it("navigates back when history length > 1", async () => {
+    Object.defineProperty(window, "history", { value: { length: 3 } });
+    const navigate = vi.fn();
+    (useNavigate as any).mockReturnValue(navigate);
+
+    const { getByText } = render(<Page />);
+    fireEvent.click(getByText("Previous Page"));
+    expect(navigate).toHaveBeenCalledWith(-1);
+  });
+  it("skips setting error for PGRST116", async () => {
+    vi.spyOn(supabase, "from").mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ error: { code: "PGRST116" } }),
+    } as any);
+    render(<Page />);
+    await vi.waitFor(() => expect(mockErrorRendered).not.toHaveBeenCalled());
+  });
 });

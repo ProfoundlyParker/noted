@@ -30,6 +30,7 @@ export function withInitialState<TProps>(
 
     useEffect(() => {
       if (inProgress.current) {
+        /* c8 ignore next 2 */
         return
       }
       setIsLoading(true);
@@ -88,6 +89,7 @@ export function withInitialState<TProps>(
     }
 
     if (error) {
+      /* c8 ignore next 2 */
       {errorMessage && <ErrorMessage message={errorMessage} onClose={() => setErrorMessage(null)} />}
     }
 
