@@ -19,7 +19,7 @@ export const NodeContainer = ({ node, index, isFocused, updateFocusedIndex, regi
     })
     const nodeRef = useRef<HTMLDivElement>(null);
      const combinedRef = (el: HTMLDivElement | null) => {
-        nodeRef.current = el;
+        (nodeRef as React.MutableRefObject<any>).current = el;
         setNodeRef(el);
         if (el && registerRef) {
             registerRef(index, el);
@@ -40,7 +40,7 @@ export const NodeContainer = ({ node, index, isFocused, updateFocusedIndex, regi
         if ((e.target as HTMLElement).closest(`.${styles.dragHandle}`)) return;
         updateFocusedIndex(index);
         // Try to focus the first input or textarea inside NodeTypeSwitcher
-        nodeSwitcherRef.current?.querySelector("input,textarea")?.focus();
+        (nodeSwitcherRef.current?.querySelector("input,textarea") as HTMLElement)?.focus();
     };
 
     return (

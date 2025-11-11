@@ -24,7 +24,7 @@ export function withInitialState<TProps>(
 
     const [initialState, setInitialState] = useState<Page | null>();
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<Error | undefined>();
+    const [error, _setError] = useState<Error | undefined>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const inProgress = useRef(false)
 

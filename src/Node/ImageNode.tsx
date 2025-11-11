@@ -23,7 +23,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     const [loading, setLoading] = useState(false);
     const [imagePath, setImagePath] = useState(node.value);
     const [width, setWidth] = useState(node.width || 300);
-    const [height, setHeight] = useState(node.height || 200);
+    const [_height, setHeight] = useState(node.height || 200);
     const [caption, setCaption] = useState(node.caption || "");
     const [isCaptionEditing, setIsCaptionEditing] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
@@ -77,8 +77,8 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
             setLoading(true);
             const result = await uploadImage(file);
             if (!result?.filePath) setErrorMessage("No file path returned");
-            changeNodeValue(index, result.filePath);
-            setImagePath(result.filePath);
+            changeNodeValue(index, result?.filePath || '');
+            setImagePath(result?.filePath || '');
             await handleSaveCaption();
         } catch (err: any) {
             setErrorMessage("Failed to upload image");
@@ -230,7 +230,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                     minWidth={400}
                     data-testid="resize-wrapper"
                     style={{ display: "inline-table" }}
-                    onResizeStop={async (e, direction, ref, delta) => {
+                    onResizeStop={async (_e, _direction, ref, _delta) => {
                         const newWidth = ref.offsetWidth;
                         const newHeight = ref.offsetHeight;
                         setWidth(newWidth);
@@ -258,11 +258,10 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                           {isCaptionEditing ? (
                             <textarea
                                 ref={captionInputRef}
-                                type="text"
                                 className={styles.captionInput}
                                 data-testid="caption-input"
                                 value={caption}
-                                onChange={handleCaptionChange}
+                                onChange={(e: any) => handleCaptionChange(e)}
                                 onBlur={async () => {
                                     updateNodeCaptionInPage(pageId, node.id, caption);
                                     setIsCaptionEditing(false);

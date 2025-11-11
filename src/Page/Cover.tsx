@@ -214,7 +214,7 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
         }
     };    
 
-	const imageStyle = {
+	const imageStyle: React.CSSProperties = {
 		transform: `translateY(${isRepositioning ? tempOffsetY : (offsetY / 100) * imageHeight}px)`,
 		cursor: isRepositioning ? (dragging ? "grabbing" : "grab") : "default",
 		userSelect: isRepositioning ? "none" : "auto",
@@ -234,13 +234,13 @@ export const Cover = ({ filePath, changePageCover, pageId }: CoverProps) => {
 
             const { error } = await supabase
                 .from("pages")
-                .update({ cover: result.filePath, cover_offset_y: 0 })
+                .update({ cover: result?.filePath, cover_offset_y: 0 })
                 .eq("id", pageId)
                 .eq("created_by", userId);
 
             if (error) throw error;
 
-            changePageCover(result.filePath);
+            changePageCover(result?.filePath || '');
             setOffsetY(0);
 
         } catch (error: any) {

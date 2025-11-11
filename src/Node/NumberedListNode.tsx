@@ -349,7 +349,7 @@ export const NumberedListNode = ({
     >
         <div
             ref={(el) => {
-                nodeRef.current = el;
+                (nodeRef as React.MutableRefObject<any>).current = el;
                 if (el && registerRef) {
                     registerRef(index, el);
                 }

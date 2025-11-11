@@ -25,8 +25,8 @@ export const Page = ({ node }: PageNodeProps) => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [numericId, setNumericId] = useState<number | null>(null);
-    const {title, nodes, addNode, cover, setCoverImage, reorderNodes, setTitle, isCommanPanelOpen} = useAppState();
-    const [focusedNodeIndex, setFocusedNodeIndex] = useFocusedNodeIndex({ nodes });
+    const {title, nodes, addNode, cover, setCoverImage, reorderNodes, setTitle, isCommandPanelOpen} = useAppState();
+    const [focusedNodeIndex, setFocusedNodeIndex] = useFocusedNodeIndex({ nodes, commandPanelRef: { current: null } as React.RefObject<HTMLDivElement> });
     const [emoji, setEmoji] = useState("📃");
     const [showPicker, setShowPicker] = useState(false);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -158,7 +158,7 @@ export const Page = ({ node }: PageNodeProps) => {
                 return;
             }
             try {
-                const { data: userData, error: authError } = await supabase.auth.getUser();
+                const { data: _userData, error: authError } = await supabase.auth.getUser();
                 if (authError) {
                     setErrorMessage("Failed to fetch user data");
                     return;
@@ -190,7 +190,7 @@ export const Page = ({ node }: PageNodeProps) => {
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (isCommanPanelOpen) return;
+            if (isCommandPanelOpen) return;
             if (event.key === "ArrowUp") {
                 event.preventDefault();
                 if (focusedNodeIndex > 0) {
@@ -216,7 +216,7 @@ export const Page = ({ node }: PageNodeProps) => {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [focusedNodeIndex, nodes.length, isCommanPanelOpen]);
+    }, [focusedNodeIndex, nodes.length, isCommandPanelOpen]);
 
     
 
@@ -320,9 +320,10 @@ export const Page = ({ node }: PageNodeProps) => {
         {id && (
                 <button onClick={handleBackClick} className={styles.backButton}>Previous Page</button>
             )}
+        {/* @ts-ignore */}
         <PageIdContext.Provider value={numericId?.toString()}>
             <div className={styles.coverWrapper}>
-            <Cover filePath={cover} changePageCover={setCoverImage} pageId={numericId} />
+            <Cover filePath={cover} changePageCover={setCoverImage} pageId={numericId ?? undefined} />
             <div className={styles.pageHeader}>
                     <span onClick={handleEmojiIconClick} className={styles.emoji} data-testid="emoji-option">
                         {emoji}
@@ -376,14 +377,14 @@ export const Page = ({ node }: PageNodeProps) => {
                         if (Array.isArray(group)) {
                         return (
                             <ol key={`group-${groupIndex}`} style={{ paddingLeft: "4rem", margin: 0 }}>
-                            {group.map((node, indexInGroup) => (
+                            {group.map((node, _indexInGroup) => (
                                 <li key={node.id} style={{ listStyleType: "decimal" }}>
                                 <SortableNumberedListNode
                                     node={node}
                                     index={nodes.findIndex(n => n.id === node.id)}
                                     isFocused={focusedNodeIndex === nodes.findIndex(n => n.id === node.id)}
                                     updateFocusedIndex={setFocusedNodeIndex}
-                                    registerRef={(i, el) => nodeRefs.current.set(i, el)}
+                                    registerRef={(i, el) => nodeRefs.current.set(i, el as any)}
                                     />
                                 </li>
                             ))}

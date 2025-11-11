@@ -58,7 +58,7 @@ export const SortableNumberedListNode = ({ node, index, isFocused, updateFocused
         index={index}
         isFocused={isFocused}
         updateFocusedIndex={updateFocusedIndex}
-        registerRef={registerRef}
+        registerRef={(i, el) => registerRef?.(i, el as any)}
       />
     </div>
   </li>

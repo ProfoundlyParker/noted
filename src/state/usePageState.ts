@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 export const usePageState = (initialState: Page) => {
     const [page, setPage] = useSyncedState(initialState, updatePage);
     const [userId, setUserId] = useState<string | null>(null);
-    const [isCommanPanelOpen, setIsCommandPanelOpen] = useState(false);
+    const [isCommandPanelOpen, setIsCommandPanelOpen] = useState(false);
     
         useEffect(() => {
         const getUser = async () => {
@@ -132,7 +132,7 @@ export const usePageState = (initialState: Page) => {
         reorderNodes,
         setEmoji,
         updateNodeCaptionInDatabase,
-        isCommanPanelOpen,
+        isCommandPanelOpen,
         setIsCommandPanelOpen,
     }
 }
