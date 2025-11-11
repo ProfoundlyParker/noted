@@ -41,11 +41,15 @@ export const CommandPanel = ({ selectItem, nodeText }: CommandPanelProps) => {
         const handleKeyDown = (event: KeyboardEvent) => {
             switch (event.key) {
                 case "ArrowUp":
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
                     setSelectedItemIndex(prevIndex =>
                         prevIndex > 0 ? prevIndex - 1 : supportedNodeTypes.length - 1
                     );
                     break;
                 case "ArrowDown": 
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
                     setSelectedItemIndex(prevIndex => (prevIndex < supportedNodeTypes.length - 1 ? prevIndex + 1 : 0));
                     break;
                 case "Enter":
@@ -58,10 +62,10 @@ export const CommandPanel = ({ selectItem, nodeText }: CommandPanelProps) => {
             }
         }
 
-        window.addEventListener("keydown", handleKeyDown)
+        window.addEventListener("keydown", handleKeyDown, { capture: true });
 
         return () => {
-            window.removeEventListener("keydown", handleKeyDown)
+            window.removeEventListener("keydown", handleKeyDown, { capture: true });
         }
     }, [selectedItemIndex, selectItem]);
 
