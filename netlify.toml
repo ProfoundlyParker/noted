@@ -1,6 +1,0 @@
-[build]
-  command = "npm run build"
-  publish = "dist"
-
-[build.secrets]
-  allowed = ["VITE_SUPABASE_URL", "VITE_SUPABASE_API_KEY"]
