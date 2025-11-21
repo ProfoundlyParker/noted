@@ -57,16 +57,30 @@ export function withInitialState<TProps>(
             return          
           } 
            if (pageSlug === "start") {
-            const { error: insertError } = await supabase
+             const { data: existingStart } = await supabase
               .from("pages")
-              .insert({ ...startPageScaffold, slug: "start", created_by: userId });
-            const { data } = await supabase
+              .select("id")
+              .match({ slug: "start", created_by: userId })
+              .limit(1);
+
+            if (!existingStart?.length) {
+              const { error: insertError } = await supabase
+                .from("pages")
+                .insert({ ...startPageScaffold, slug: "start", created_by: userId });
+
+              if (insertError) throw insertError;
+            }
+
+            const { data: startPage } = await supabase
               .from("pages")
               .select("title, id, cover, nodes, slug")
-              .match({ slug: "start", created_by: userId });
-            if (insertError) throw insertError;
+              .match({ slug: "start", created_by: userId })
+              .limit(1);
 
-            setInitialState(data?.[0]);
+            setInitialState(startPage?.[0]);
+            inProgress.current = false;
+            setIsLoading(false);
+            return;
           } else {
             setErrorMessage("Page not found");
           }
