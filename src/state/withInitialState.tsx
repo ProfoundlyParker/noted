@@ -33,8 +33,8 @@ export function withInitialState<TProps>(
         /* c8 ignore next 2 */
         return
       }
-      setIsLoading(true);
       inProgress.current = true;
+      setIsLoading(true);
       const fetchInitialState = async () => {
         try {
           const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -45,7 +45,8 @@ export function withInitialState<TProps>(
           const { data, error } = await supabase
             .from("pages")
             .select("title, id, cover, nodes, slug")
-            .match({ slug: pageSlug, created_by: userId });
+            .match({ slug: pageSlug, created_by: userId })
+            .limit(1);
 
           if (error) throw error;
 
