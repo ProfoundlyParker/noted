@@ -50,18 +50,12 @@ export function withInitialState<TProps>(
 
           if (error) throw error;
 
-          if (!data?.[0]) {
-            const retryData: any = await supabase
-                .from("pages")
-                .select("*")
-                .match({ slug: "start", created_by: userId })
-                .limit(1);
-
-            if (retryData?.[0]) {
-                setInitialState(retryData[0]);
-                setIsLoading(false);
-                return;
-          }
+          if (data?.[0]) {
+            setInitialState(data?.[0]);
+            inProgress.current = false;
+            setIsLoading(false);
+            return          
+          } 
            if (pageSlug === "start") {
              const { data: existingStart } = await supabase
               .from("pages")
