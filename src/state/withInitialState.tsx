@@ -84,6 +84,10 @@ export function withInitialState<TProps>(
           } else {
             setErrorMessage("Page not found");
           }
+        if (pageSlug === "start" && !data?.[0]) {
+            window.location.href = "/";
+            return;
+        }
         } catch (err: any) {
           console.error(err);
           setErrorMessage("Failed to load page data");
