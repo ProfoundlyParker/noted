@@ -99,6 +99,7 @@
     justify-content: flex-start;
     box-sizing: border-box;
     position: relative;
+    overflow: visible;
 }
   
 .buttonContainer {
@@ -222,6 +223,16 @@
     color: white;
     cursor: pointer;
     border-radius: 5px;
+  }
+  .imageWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    position: relative;
+  }
+  .imageWrapper::-webkit-scrollbar {
+    display: none;
   }
 }
 

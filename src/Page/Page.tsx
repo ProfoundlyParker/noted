@@ -393,7 +393,6 @@ export const Page = ({ node }: PageNodeProps) => {
                         } else {
                         const index = nodes.findIndex(n => n.id === group.id);
                         return (
-                            <div className={styles.container}>
                             <NodeContainer
                             key={group.id}
                             node={group}
@@ -402,7 +401,6 @@ export const Page = ({ node }: PageNodeProps) => {
                             updateFocusedIndex={setFocusedNodeIndex}
                             registerRef={(i, el) => nodeRefs.current.set(i, el)}
                             />
-                            </div>
                         );
                         }
                     });
