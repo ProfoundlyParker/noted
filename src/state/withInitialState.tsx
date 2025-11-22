@@ -84,11 +84,6 @@ export function withInitialState<TProps>(
           } else {
             setErrorMessage("Page not found");
           }
-          supabase.auth.onAuthStateChange((event) => {
-            if (event === "SIGNED_IN") {
-              window.location.reload();
-            }
-          });
         } catch (err: any) {
           console.error(err);
           setErrorMessage("Failed to load page data");

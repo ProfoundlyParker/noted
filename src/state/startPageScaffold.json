@@ -134,11 +134,21 @@
     {
       "type": "text",
       "value": "",
+      "id": "uomh0o1_LEYEJ9NBFJNqJ"
+    },
+    {
+      "type": "text",
+      "value": "👉 Step 6 (Non-touch screen devices): Add an image, hover your cursor over the right edge until the resize handle appears, then click and drag to set the size you want",
+      "id": "oo7ehJMznqOq5plG3Um_9"
+    },
+       {
+      "type": "text",
+      "value": "",
       "id": "hSRE8HNNC0Z50VrMuzCSS"
     },
     {
       "type": "text",
-      "value": "✨ Bonus: Add an image with a caption or even create a new page with `/page`",
+      "value": "✨ Bonus: Add a caption to your image or create a new page with `/page`",
       "id": "765A3xPw56d8j7NcYpi3D"
     }
   ]
