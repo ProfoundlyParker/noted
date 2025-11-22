@@ -230,9 +230,13 @@
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
     position: relative;
+    scroll-snap-type: x mandatory;
   }
   .imageWrapper::-webkit-scrollbar {
     display: none;
+  }
+  .imageWrapper > * {
+    scroll-snap-align: start;
   }
 }
 
