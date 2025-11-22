@@ -234,9 +234,18 @@
   .mobileScroll::-webkit-scrollbar {
     display: none;
   }
-  .mobileScroll > .re-resizable {
+  .mobileScroll {
+    white-space: nowrap;
+  }
+  .mobileScroll > .re-resizable,
+  .mobileScroll > * {
     width: max-content !important;
     max-width: none !important;
+    display: inline-block;
+  }
+  .mobileScroll img {
+    max-width: none !important;
+    width: auto !important;
   }
 }
 
