@@ -189,6 +189,8 @@
     box-sizing: border-box;
     align-items: start;
     overflow: auto;
+    overflow-x: scroll;
+    overflow-x: visible;
   }
   .re-resizable > img,
   .imageWrapper img {
