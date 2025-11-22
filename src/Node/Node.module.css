@@ -99,7 +99,6 @@
     justify-content: flex-start;
     box-sizing: border-box;
     position: relative;
-    overflow: visible;
 }
   
 .buttonContainer {
@@ -224,19 +223,20 @@
     cursor: pointer;
     border-radius: 5px;
   }
-  .imageWrapper {
+  .mobileScroll {
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: visible;
+    width: 100%;
     -webkit-overflow-scrolling: touch;
-    max-width: 100%;
     position: relative;
-    scroll-snap-type: x mandatory;
+    touch-action: pan-x;
   }
-  .imageWrapper::-webkit-scrollbar {
+  .mobileScroll::-webkit-scrollbar {
     display: none;
   }
-  .imageWrapper > * {
-    scroll-snap-align: start;
+  .mobileScroll > .re-resizable {
+    width: max-content !important;
+    max-width: none !important;
   }
 }
 
