@@ -179,6 +179,7 @@
   max-width: 100%;
   margin: 0 auto;
   position: relative; 
+  overflow: visible;
 }
 
 @media (max-width: 650px) {
@@ -222,7 +223,17 @@
     color: white;
     cursor: pointer;
     border-radius: 5px;
-}
+  }
+  .imageAndCaption {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .imageAndCaption::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .pageCover {
