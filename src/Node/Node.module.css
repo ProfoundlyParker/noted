@@ -223,30 +223,6 @@
     cursor: pointer;
     border-radius: 5px;
   }
-  .mobileScroll {
-    overflow-x: auto;
-    overflow-y: visible;
-    width: 100%;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-    touch-action: pan-x;
-  }
-  .mobileScroll::-webkit-scrollbar {
-    display: none;
-  }
-  .mobileScroll {
-    white-space: nowrap;
-  }
-  .mobileScroll > .re-resizable,
-  .mobileScroll > * {
-    width: max-content !important;
-    max-width: none !important;
-    display: inline-block;
-  }
-  .mobileScroll img {
-    max-width: none !important;
-    width: auto !important;
-  }
 }
 
 .pageCover {

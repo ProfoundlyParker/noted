@@ -212,7 +212,6 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
             {imagePath ? (
                     <>
             <div className={styles.imageAndCaption}>
-                <div className={styles.mobileScroll}>
                  <Resizable
                     size={{ width }}
                     enable={{
@@ -293,7 +292,6 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         )}
                         </div>
                     </Resizable>
-                </div>
                 {loading && <Loader />}
             </div>
                 </>
