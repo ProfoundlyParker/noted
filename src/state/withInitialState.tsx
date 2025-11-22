@@ -36,11 +36,6 @@ export function withInitialState<TProps>(
       inProgress.current = true;
       setIsLoading(true);
       const fetchInitialState = async () => {
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData?.session?.user) {
-          setTimeout(fetchInitialState, 300);
-          return;
-        }
         try {
           const { data: userData, error: userError } = await supabase.auth.getUser();
           if (userError || !userData?.user?.id) throw new Error("Failed to fetch user info");
@@ -89,6 +84,11 @@ export function withInitialState<TProps>(
           } else {
             setErrorMessage("Page not found");
           }
+          supabase.auth.onAuthStateChange((event) => {
+            if (event === "SIGNED_IN") {
+              window.location.reload();
+            }
+          });
         } catch (err: any) {
           console.error(err);
           setErrorMessage("Failed to load page data");
