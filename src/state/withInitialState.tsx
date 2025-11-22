@@ -36,6 +36,11 @@ export function withInitialState<TProps>(
       inProgress.current = true;
       setIsLoading(true);
       const fetchInitialState = async () => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session?.user) {
+          setTimeout(fetchInitialState, 300);
+          return;
+        }
         try {
           const { data: userData, error: userError } = await supabase.auth.getUser();
           if (userError || !userData?.user?.id) throw new Error("Failed to fetch user info");
