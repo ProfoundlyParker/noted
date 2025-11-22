@@ -188,6 +188,7 @@
     max-width: 70% !important;
     box-sizing: border-box;
     align-items: start;
+    overflow: auto;
   }
   .re-resizable > img,
   .imageWrapper img {
