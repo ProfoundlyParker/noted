@@ -194,7 +194,9 @@
     width: 80% !important;
     max-width: 80% !important;
     height: auto !important;
-    display: block;
+    display: flex;
+    overflow-x: scroll !important;
+    overscroll-behavior-x: auto !important;
   }
   .imageWrapper {
     width: 100%;
