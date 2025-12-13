@@ -188,6 +188,9 @@
     max-width: 70% !important;
     box-sizing: border-box;
     align-items: start;
+    display: flex;
+    overflow-x: scroll !important;
+    overscroll-behavior-x: auto !important;
   }
   .re-resizable > img,
   .imageWrapper img {
