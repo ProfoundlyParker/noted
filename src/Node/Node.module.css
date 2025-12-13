@@ -204,7 +204,7 @@
   }
   .imageWrapper {
     width: 100%;
-    align-items: flex-start;
+    align-items: flex-start !important;
     scroll-snap-align: start;
   }
   .caption {
