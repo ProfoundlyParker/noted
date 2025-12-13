@@ -186,6 +186,7 @@
     overflow-x: auto;
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
   }
   .re-resizable,
   .imageWrapper {
@@ -203,6 +204,8 @@
   }
   .imageWrapper {
     width: 100%;
+    align-items: flex-start;
+    scroll-snap-align: start;
   }
   .caption {
     text-align: center;
