@@ -232,17 +232,6 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
           <div className={styles.imageScrollContainer}>
             <div className={styles.imageAndCaption}>
                  <Resizable
-                    size={{ width }}
-                    enable={{
-                        top: false,
-                        right: true,
-                        bottom: false,
-                        left: true,
-                        topRight: false,
-                        bottomRight: false,
-                        bottomLeft: false,
-                        topLeft: false,
-                    }}
                     maxWidth={900}
                     maxHeight={700}
                     minHeight="auto"
