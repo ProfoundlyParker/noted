@@ -182,22 +182,6 @@
 }
 
 @media (max-width: 650px) {
-  .imageWrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    display: block;
-    text-align: left;
-  }
-  .imageWrapper img {
-    display: block;
-    width: 150%;
-    max-width: none;
-    height: auto;
-    object-fit: none;
-    object-position: left center;
-    transform: none;
-    margin-left: 0;
-  }
   .re-resizable,
   .imageWrapper {
     width: 70% !important;

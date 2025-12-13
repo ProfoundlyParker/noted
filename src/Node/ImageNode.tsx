@@ -208,7 +208,8 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
 
 
     return (
-        <div className={cx(styles.node, styles.image)} ref={nodeRef} data-testid="image-node">
+        <div className={cx(styles.node, styles.image)} ref={nodeRef} data-testid="image-node"
+        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
             {imagePath ? (
                     <>
             <div className={styles.imageAndCaption}>
