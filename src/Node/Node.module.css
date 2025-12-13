@@ -174,7 +174,7 @@
 .imageAndCaption {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
@@ -195,7 +195,6 @@
     width: 70% !important;
     max-width: 70% !important;
     box-sizing: border-box;
-    align-items: start;
   }
   .re-resizable > img,
   .imageWrapper img {
