@@ -182,24 +182,24 @@
 }
 
 @media (max-width: 650px) {
+  .node {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
   .re-resizable,
   .imageWrapper {
     width: 70% !important;
     max-width: 70% !important;
     box-sizing: border-box;
     align-items: start;
-    display: flex;
-    overflow-x: scroll !important;
-    overscroll-behavior-x: auto !important;
   }
   .re-resizable > img,
   .imageWrapper img {
     width: 80% !important;
     max-width: 80% !important;
     height: auto !important;
-    display: flex;
-    overflow-x: scroll !important;
-    overscroll-behavior-x: auto !important;
+    display: block;
   }
   .imageWrapper {
     width: 100%;
