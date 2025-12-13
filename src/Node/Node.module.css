@@ -187,7 +187,7 @@
 }
 
 @media (max-width: 650px) {
-  .re-resizable,
+  /* .re-resizable,
   .imageWrapper {
     width: 70% !important;
     max-width: 70% !important;
@@ -203,6 +203,15 @@
     max-width: 80% !important;
     height: auto !important;
     display: block;
+  } */
+  .re-resizable {
+    width: auto !important;
+    max-width: none !important;
+    display: inline-block;
+  }
+  .imageWrapper {
+    width: auto !important;
+    max-width: none !important;
   }
   .caption {
     text-align: center;
