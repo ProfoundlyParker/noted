@@ -238,7 +238,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         await updateNodeSizeInPage(pageId, node.id, newWidth, newHeight);
                     }}
                     >
-                    <div className={styles.imageWrapper} style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%" }} onClick={() => {
+                    <div className={styles.imageWrapper} onClick={() => {
                         if (isMobile) {
                             /* c8 ignore next 2 */
                             setShowButtons((prev) => !prev);
@@ -247,7 +247,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         <FileImage
                         filePath={imagePath}
                         data-testid="node-image"
-                        style={{ width: "max-content", height: "auto", objectFit: "unset", display: "block" }}
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
                         />
                         <div className={styles.buttonContainer} data-testid="buttons" style={{ display: isMobile ? (showButtons ? "flex" : "none") : undefined }}>
                         <button onClick={handleDeleteImage} data-testid="delete-image" className={styles.button}>Delete</button>

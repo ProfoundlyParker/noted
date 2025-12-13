@@ -182,6 +182,14 @@
 }
 
 @media (max-width: 650px) {
+  .node {
+    max-width: 100vw;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .node img {
+    max-width: none;
+  }
   .re-resizable,
   .imageWrapper {
     width: 70% !important;
