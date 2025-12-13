@@ -247,7 +247,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         <FileImage
                         filePath={imagePath}
                         data-testid="node-image"
-                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        style={{ width: "max-content", height: "auto", objectFit: "unset", display: "block" }}
                         />
                         <div className={styles.buttonContainer} data-testid="buttons" style={{ display: isMobile ? (showButtons ? "flex" : "none") : undefined }}>
                         <button onClick={handleDeleteImage} data-testid="delete-image" className={styles.button}>Delete</button>
