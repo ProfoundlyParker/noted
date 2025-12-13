@@ -205,13 +205,11 @@
     display: block;
   } */
   .re-resizable {
-    width: auto !important;
     max-width: none !important;
     display: inline-block;
   }
   .imageWrapper {
-    width: auto !important;
-    max-width: none !important;
+    width: 100%;
   }
   .caption {
     text-align: center;
@@ -248,6 +246,7 @@
   .imageAndCaption {
     width: max-content;
     max-width: none;
+    display: inline-block;
   }
 }
 

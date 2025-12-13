@@ -212,7 +212,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
             {imagePath ? (
                     <>
           <div className={styles.imageScrollContainer}>
-            <div className={styles.imageAndCaption}>
+            <div className={styles.imageAndCaption} style={{ minWidth: `${width}px` }}>
                  <Resizable
                     size={{ width }}
                     enable={{
@@ -230,7 +230,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                     minHeight="auto"
                     minWidth={400}
                     data-testid="resize-wrapper"
-                    style={{ display: "inline-block" }}
+                    style={{ display: "inline-table" }}
                     onResizeStop={async (_e, _direction, ref, _delta) => {
                         const newWidth = ref.offsetWidth;
                         const newHeight = ref.offsetHeight;
