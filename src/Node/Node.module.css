@@ -100,6 +100,12 @@
     box-sizing: border-box;
     position: relative;
 }
+
+.re-resizable,
+.re-resizable > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
   
 .buttonContainer {
     position: absolute;
@@ -210,6 +216,11 @@
   }
   .imageWrapper {
     width: 100%;
+  }
+  .imageWrapper img, .imageWrapper > img, .re-resizable img {
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
   .caption {
     text-align: center;
