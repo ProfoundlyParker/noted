@@ -230,7 +230,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                     minHeight="auto"
                     minWidth={400}
                     data-testid="resize-wrapper"
-                    style={{ display: "inline-table" }}
+                    style={{ display: "inline-block" }}
                     onResizeStop={async (_e, _direction, ref, _delta) => {
                         const newWidth = ref.offsetWidth;
                         const newHeight = ref.offsetHeight;
