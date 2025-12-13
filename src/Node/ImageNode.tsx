@@ -247,7 +247,6 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                     maxHeight={700}
                     minHeight="auto"
                     minWidth={minImageWidth}
-                    maxWidth={maxImageWidth}
                     data-testid="resize-wrapper"
                     style={{ display: "inline-table" }}
                     onResizeStop={async (_e, _direction, ref, _delta) => {
