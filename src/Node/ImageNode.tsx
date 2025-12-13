@@ -208,8 +208,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
 
 
     return (
-        <div className={cx(styles.node, styles.image)} ref={nodeRef} data-testid="image-node"
-        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div className={cx(styles.node, styles.image)} ref={nodeRef} data-testid="image-node">
             {imagePath ? (
                     <>
             <div className={styles.imageAndCaption}>
@@ -248,7 +247,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         <FileImage
                         filePath={imagePath}
                         data-testid="node-image"
-                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        style={{ width: "100%", height: "100%", objectFit: "contain", overflowX: "auto", WebkitOverflowScrolling: "touch" }}
                         />
                         <div className={styles.buttonContainer} data-testid="buttons" style={{ display: isMobile ? (showButtons ? "flex" : "none") : undefined }}>
                         <button onClick={handleDeleteImage} data-testid="delete-image" className={styles.button}>Delete</button>
