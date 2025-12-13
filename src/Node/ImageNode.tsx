@@ -30,11 +30,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
     const captionInputRef = useRef<HTMLTextAreaElement>(null);
     const [showButtons, setShowButtons] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const isMobile = typeof window !== "undefined" && window.innerWidth <= 650;
-    const [viewportWidthState, setViewportWidthState] = useState(typeof window !== "undefined" ? window.innerWidth : 1000);
-    const padding = 32; // keep some space for margins
-    const maxImageWidth = isMobile ? viewportWidthState - padding : 900;
-    const minImageWidth = isMobile ? 120 : 400;
+    const isMobile = window.innerWidth <= 650;
     const nodeRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -56,20 +52,6 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
             };
         getUser();
     }, []);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setViewportWidthState(window.innerWidth);
-        };
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    useEffect(() => {
-        if (width > maxImageWidth) {
-            setWidth(maxImageWidth);
-        }
-    }, [maxImageWidth]);
 
     useEffect(() => {
         if (!errorMessage) return;
@@ -229,23 +211,10 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
         <div className={cx(styles.node, styles.image)} ref={nodeRef} data-testid="image-node">
             {imagePath ? (
                     <>
-          <div className={styles.imageScrollContainer}>
             <div className={styles.imageAndCaption}>
                  <Resizable
-                    maxWidth={900}
-                    maxHeight={700}
-                    minHeight="auto"
-                    minWidth={minImageWidth}
-                    data-testid="resize-wrapper"
-                    style={{ display: "inline-table" }}
-                    onResizeStop={async (_e, _direction, ref, _delta) => {
-                        const newWidth = Math.min(ref.offsetWidth, maxImageWidth);
-                        const newHeight = ref.offsetHeight;
-                        setWidth(newWidth);
-                        setHeight(newHeight);
-                        await updateNodeSizeInPage(pageId, node.id, newWidth, newHeight);
-                    }}
-                    enable={isMobile ? { top: false, right: false, bottom: false, left: false, topRight: false, bottomRight: false, bottomLeft: false, topLeft: false } : {
+                    size={{ width }}
+                    enable={{
                         top: false,
                         right: true,
                         bottom: false,
@@ -255,7 +224,19 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         bottomLeft: false,
                         topLeft: false,
                     }}
-                    size={{ width: Math.min(width, maxImageWidth) }}
+                    maxWidth={900}
+                    maxHeight={700}
+                    minHeight="auto"
+                    minWidth={400}
+                    data-testid="resize-wrapper"
+                    style={{ display: "inline-table" }}
+                    onResizeStop={async (_e, _direction, ref, _delta) => {
+                        const newWidth = ref.offsetWidth;
+                        const newHeight = ref.offsetHeight;
+                        setWidth(newWidth);
+                        setHeight(newHeight);
+                        await updateNodeSizeInPage(pageId, node.id, newWidth, newHeight);
+                    }}
                     >
                     <div className={styles.imageWrapper} onClick={() => {
                         if (isMobile) {
@@ -313,7 +294,6 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                     </Resizable>
                 {loading && <Loader />}
             </div>
-          </div>
                 </>
                 ) : (
                     <button

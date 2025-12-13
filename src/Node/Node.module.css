@@ -100,12 +100,6 @@
     box-sizing: border-box;
     position: relative;
 }
-
-.re-resizable,
-.re-resizable > * {
-  max-width: 100%;
-  box-sizing: border-box;
-}
   
 .buttonContainer {
     position: absolute;
@@ -187,21 +181,13 @@
   position: relative;
 }
 
-.imageScrollContainer {
-  width: 100%;
-  overflow: visible;
-}
-
 @media (max-width: 650px) {
-  /* .re-resizable,
+  .re-resizable,
   .imageWrapper {
     width: 70% !important;
     max-width: 70% !important;
     box-sizing: border-box;
     align-items: start;
-    overflow: auto;
-    overflow-x: scroll;
-    overflow-x: visible;
   }
   .re-resizable > img,
   .imageWrapper img {
@@ -209,18 +195,9 @@
     max-width: 80% !important;
     height: auto !important;
     display: block;
-  } */
-  .re-resizable {
-    max-width: none !important;
-    display: inline-block;
   }
   .imageWrapper {
     width: 100%;
-  }
-  .imageWrapper img, .imageWrapper > img, .re-resizable img {
-    max-width: 100%;
-    height: auto;
-    display: block;
   }
   .caption {
     text-align: center;
@@ -248,16 +225,6 @@
     color: white;
     cursor: pointer;
     border-radius: 5px;
-  }
-  .imageScrollContainer {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-  .imageAndCaption {
-    width: max-content;
-    max-width: none;
-    display: inline-block;
   }
 }
 
