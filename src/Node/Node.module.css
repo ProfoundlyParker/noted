@@ -182,11 +182,21 @@
 }
 
 @media (max-width: 650px) {
-  .node {
+  .imageWrapper {
     overflow-x: auto;
-    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
+    display: block;
+    text-align: left;
+  }
+  .imageWrapper img {
+    display: block;
+    width: 150%;
+    max-width: none;
+    height: auto;
+    object-fit: none;
+    object-position: left center;
+    transform: none;
+    margin-left: 0;
   }
   .re-resizable,
   .imageWrapper {
@@ -204,8 +214,6 @@
   }
   .imageWrapper {
     width: 100%;
-    align-items: flex-start !important;
-    scroll-snap-align: start;
   }
   .caption {
     text-align: center;
