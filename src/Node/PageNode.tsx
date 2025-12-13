@@ -159,7 +159,7 @@ export const PageNode = ({ node, isFocused, index }: PageNodeProps) => {
     }, []);
 
     return (
-        <div className={cx(styles.node, styles.page)}>
+        <div className={cx(styles.node, styles.page)} style={{ width: "20rem" }}>
                 {cover ? (
                     <div className={styles.pageCover} onClick={handlePageClick}>
                     <FileImage
