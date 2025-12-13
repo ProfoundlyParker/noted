@@ -211,6 +211,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
         <div className={cx(styles.node, styles.image)} ref={nodeRef} data-testid="image-node">
             {imagePath ? (
                     <>
+          <div className={styles.imageScrollContainer}>
             <div className={styles.imageAndCaption}>
                  <Resizable
                     size={{ width }}
@@ -294,6 +295,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                     </Resizable>
                 {loading && <Loader />}
             </div>
+          </div>
                 </>
                 ) : (
                     <button

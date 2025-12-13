@@ -181,6 +181,11 @@
   position: relative;
 }
 
+.imageScrollContainer {
+  width: 100%;
+  overflow: visible;
+}
+
 @media (max-width: 650px) {
   .re-resizable,
   .imageWrapper {
@@ -225,6 +230,15 @@
     color: white;
     cursor: pointer;
     border-radius: 5px;
+  }
+  .imageScrollContainer {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .imageAndCaption {
+    width: max-content;
+    max-width: none;
   }
 }
 
