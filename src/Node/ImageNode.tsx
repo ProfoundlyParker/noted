@@ -238,7 +238,7 @@ export const ImageNode = ({ node, index }: ImageNodeProps) => {
                         await updateNodeSizeInPage(pageId, node.id, newWidth, newHeight);
                     }}
                     >
-                    <div className={styles.imageWrapper} style={{ overflowX: isMobile ? "auto" : undefined, WebkitOverflowScrolling: "touch", width: "100%" }} onClick={() => {
+                    <div className={styles.imageWrapper} style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%" }} onClick={() => {
                         if (isMobile) {
                             /* c8 ignore next 2 */
                             setShowButtons((prev) => !prev);
