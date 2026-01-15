@@ -2,8 +2,8 @@ Noted is a Notion-style collaborative editor that allows users to create, edit, 
 
 <p>Please click <a href="https://parkerramey.super.site/projects/noted">here</a> to view a video preview</p>
 
-This project is currently a work in progress. They key features can be seen below, as well as some possible future improvements<br>
-<h3><strong>To be deployed mid-November 2025</strong></h3>
+The key features can be seen below, as well as some possible future improvements<br>
+<h3><strong>Instructions for use coming early 2026!</strong></h3>
 
 ### **Key Features:**
 
