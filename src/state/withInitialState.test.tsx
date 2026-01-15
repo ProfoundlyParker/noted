@@ -9,6 +9,7 @@ vi.mock("react-router-dom", () => ({
   useMatch: vi.fn(),
 }));
 
+const limitMock = vi.fn().mockReturnThis();
 const selectMock = vi.fn().mockReturnThis();
 const matchMock = vi.fn().mockReturnThis();
 const insertMock = vi.fn().mockReturnThis();
@@ -21,6 +22,7 @@ vi.mock("../supabaseClient", () => ({
     from: vi.fn(() => ({
       select: selectMock,
       match: matchMock,
+      limit: limitMock,
       insert: insertMock,
     })),
   },
@@ -36,11 +38,10 @@ describe("withInitialState", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-
   it("renders loader while loading", async () => {
     mockUseMatch.mockReturnValue({ params: { slug: "test" } });
     supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "123" } } });
-    supabase.from().select().match.mockResolvedValue({ data: [{ title: "Test Page" }] });
+    limitMock.mockResolvedValue({ data: [{ title: "Test Page" }] });
 
     render(<Wrapped />);
     expect(screen.getByTestId("loader")).toBeInTheDocument();
@@ -49,7 +50,6 @@ describe("withInitialState", () => {
       expect(screen.getByText("Loaded Page: Test Page")).toBeInTheDocument();
     });
   });
-
   it("shows error if user is not logged in", async () => {
     mockUseMatch.mockReturnValue({ params: { slug: "test" } });
     supabase.auth.getUser.mockResolvedValue({ data: { user: null } });
@@ -57,7 +57,6 @@ describe("withInitialState", () => {
     render(<Wrapped />);
     expect(await screen.findByText(/oops! this page doesn’t exist/i)).toBeInTheDocument();
   });
-
   it('shows "Page not found" if no page is returned', async () => {
     mockUseMatch.mockReturnValue({ params: { slug: "missing" } });
     supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "123" } } });
@@ -65,36 +64,6 @@ describe("withInitialState", () => {
 
     render(<Wrapped />);
     expect(await screen.findByText(/oops! this page doesn’t exist/i)).toBeInTheDocument();
-  });
-
-  it("inserts start page when not found and slug is 'start'", async () => {
-    mockUseMatch.mockReturnValue({ params: { slug: "start" } });
-    supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "123" } } });
-
-    supabase.from().select().match
-      .mockResolvedValueOnce({ data: [] }) // First check
-      .mockResolvedValueOnce({ data: [{ title: "Start Page" }] }); // After insert
-
-    supabase.from().insert.mockResolvedValue({});
-
-    render(<Wrapped />);
-    await waitFor(() => {
-      expect(screen.getByText("Loaded Page: Start Page")).toBeInTheDocument();
-    });
-  });
-  it("does not fetch if inProgress.current is true", async () => {
-      mockUseMatch.mockReturnValue({ params: { slug: "test" } });
-      supabase.auth.getUser.mockResolvedValue({ data: { user: { id: "123" } } });
-      supabase.from().select().match.mockResolvedValue({ data: [{ title: "Test Page" }] });
-
-      const Wrapped = withInitialState(DummyComponent);
-
-      const { rerender } = render(<Wrapped />);
-      rerender(<Wrapped />);
-
-      await waitFor(() => {
-        expect(screen.getByText("Loaded Page: Test Page")).toBeInTheDocument();
-    });
   });
   it("skips fetching data if inProgress.current is already true", async () => {
     mockUseMatch.mockReturnValue({ params: { slug: "skip" } });

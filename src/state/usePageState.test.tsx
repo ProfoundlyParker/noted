@@ -145,7 +145,7 @@ describe("usePageState", () => {
       reorderNodes: expect.any(Function),
       setEmoji: expect.any(Function),
       updateNodeCaptionInDatabase: expect.any(Function),
-      isCommanPanelOpen: false,
+      isCommandPanelOpen: false,
       setIsCommandPanelOpen: expect.any(Function),
     });
   });
@@ -205,14 +205,14 @@ describe("usePageState", () => {
 
         errorSpy.mockRestore();
     });
-    it("sets isCommanPanelOpen", () => {
+    it("sets isCommandPanelOpen", () => {
         const { result } = renderHook(() => usePageState(initialState));
 
         act(() => {
             result.current.setIsCommandPanelOpen(true);
         });
 
-        expect(result.current.isCommanPanelOpen).toBe(true);
+        expect(result.current.isCommandPanelOpen).toBe(true);
     });
     it("updates the node value with changeNodeValue", () => {
         const { result, rerender } = renderHook(() => usePageState(initialState));

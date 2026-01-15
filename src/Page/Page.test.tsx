@@ -152,7 +152,7 @@ describe("Page component", () => {
       title: mockTitle,
       nodes: [],
       cover: "test.jpg",
-      isCommanPanelOpen: false,
+      isCommandPanelOpen: false,
       addNode: vi.fn(),
       reorderNodes: vi.fn(),
       setCoverImage: vi.fn(),
@@ -264,7 +264,7 @@ describe("Page component", () => {
         title: "Test Page",
         nodes: [],
         cover: "test.jpg",
-        isCommanPanelOpen: false,
+        isCommandPanelOpen: false,
         addNode: vi.fn(),
         reorderNodes: vi.fn(),
         setCoverImage: vi.fn(),
@@ -322,7 +322,7 @@ describe("Page component", () => {
       title: "Test Page",
       nodes: [],
       cover: "test.jpg",
-      isCommanPanelOpen: false,
+      isCommandPanelOpen: false,
       addNode: vi.fn(),
       reorderNodes: vi.fn(),
       setCoverImage: vi.fn(),
@@ -344,7 +344,7 @@ describe("Page component", () => {
         title: "Test Page",
         nodes: [{ id: "a" }, { id: "b" }],
         cover: "test.jpg",
-        isCommanPanelOpen: false,
+        isCommandPanelOpen: false,
         addNode: vi.fn(),
         reorderNodes,
         setCoverImage: vi.fn(),
@@ -495,10 +495,10 @@ describe("Page component", () => {
       expect(true).toBe(true);
     });
   });
-  it("handleKeyDown returns if isCommanPanelOpen", () => {
+  it("handleKeyDown returns if isCommandPanelOpen", () => {
     (useAppState as any).mockReturnValueOnce({
       ...useAppState(),
-      isCommanPanelOpen: true,
+      isCommandPanelOpen: true,
     });
     render(<Page />);
     fireEvent.keyDown(window, { key: "ArrowUp" });
@@ -561,10 +561,10 @@ describe("Page component", () => {
     expect(getAllByTestId("list-node")).toHaveLength(1);
     expect(getAllByTestId("node")).toHaveLength(1);
   });
-  it("does not handle arrow keys if isCommanPanelOpen is true", () => {
+  it("does not handle arrow keys if isCommandPanelOpen is true", () => {
     (useAppState as any).mockReturnValueOnce({
       ...useAppState(),
-      isCommanPanelOpen: true,
+      isCommandPanelOpen: true,
       nodes: [{ id: "1", type: "text", value: "" }],
     });
 
@@ -787,11 +787,11 @@ describe("Page component", () => {
     const errorEl = await findByTestId("error");
     expect(errorEl).toBeTruthy();
   });
-  it("handleKeyDown early return if isCommanPanelOpen", () => {
+  it("handleKeyDown early return if isCommandPanelOpen", () => {
     (useAppState as any).mockReturnValueOnce({
       title: "Test",
       nodes: [{ id: "1", type: "text", value: "" }],
-      isCommanPanelOpen: true,
+      isCommandPanelOpen: true,
       setTitle: vi.fn(),
     });
 
@@ -805,7 +805,7 @@ describe("Page component", () => {
       title: "Test",
       nodes: [{ id: "1", type: "text", value: "" }],
       setTitle: vi.fn(),
-      isCommanPanelOpen: false,
+      isCommandPanelOpen: false,
     });
 
     render(<Page />);
@@ -817,7 +817,7 @@ describe("Page component", () => {
       title: "Test",
       nodes: [{ id: "1", type: "text", value: "" }],
       setTitle: vi.fn(),
-      isCommanPanelOpen: false,
+      isCommandPanelOpen: false,
     });
 
     render(<Page />);
@@ -829,7 +829,7 @@ describe("Page component", () => {
       title: "Test",
       nodes: [],
       cover: null,
-      isCommanPanelOpen: false,
+      isCommandPanelOpen: false,
       setTitle: vi.fn(),
     });
 
@@ -897,7 +897,7 @@ describe("Page component", () => {
   it("handleKeyDown returns early if command panel is open", () => {
     (useAppState as any).mockReturnValueOnce({
       ...useAppState(),
-      isCommanPanelOpen: true,
+      isCommandPanelOpen: true,
       nodes: [{ id: "1", type: "text", value: "" }],
     });
 
