@@ -109,14 +109,14 @@ Live Site: https://noted-notebook.netlify.app/
 <li>Form Validation & Error Messages
 </li>
 <br>
-<img src='readme-imgs/noted-err-1.png'>
-<img src='readme-imgs/noted-err-2.png'>
-<img src='readme-imgs/noted-err-3.png'>
-<img src='readme-imgs/noted-err-4.png'>
+<img src='readme-imgs/noted-err-1.png' style="width: 15rem;">
+<img src='readme-imgs/noted-err-2.png' style="width: 15rem;">
+<img src='readme-imgs/noted-err-3.png' style="width: 15rem;">
+<img src='readme-imgs/noted-err-4.png' style="width: 15rem;">
 <li>Custom site favicon
 </li>
 <br>
-<img src='public/favicon.ico' height='200' width='200'>
+<img src='public/noted.ico' height='200' width='200'>
 <li>Mobile-friendly
 </li>
 <br>
