@@ -65,19 +65,19 @@ Live Site: https://noted-notebook.netlify.app/
 <li>Supports image + caption uploads by using Supabase's S3 buckets
 </li>
 <br>
-<img src='readme-imgs/noted-image-upload.gif'">
+<img src='readme-imgs/noted-image-upload.gif'>
 <li>Row-Level Security (RLS) on Supabase DB
 </li>
 <br>
-<img src='readme-imgs/noted-rls.png'>
+<img src='readme-imgs/noted-rls.png' style="width: 35rem;">
 <li>Unit + integration tests with 95%+ line coverage
 </li>
 <br>
-<img src='readme-imgs/noted-tests.png'>
+<img src='readme-imgs/noted-tests.png' style="width: 35rem;">
 <li>Persistant storage using Supabase for the DB and S3 image bucket
 </li>
 <br>
-<img src='readme-imgs/noted-supabase.png'>
+<img src='readme-imgs/noted-supabase.png' style="width: 35rem;">
 <li>Image resizing on desktop + laptop screens using re-resizable
 </li>
 <br>
