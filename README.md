@@ -123,14 +123,17 @@ Live Site: https://noted-notebook.netlify.app/
 <img src='readme-imgs/sb-mobile.gif.gif'>
 
 <h3>Technical challenges I overcame:</h3>
+<ul>
 <li>Designing a Notion-style block architecture where each node type has its own rendering, state, and drag behaviour</li>
 <li>Persisting complex editor state (node order, content, image metadata, captions, and resize/repositioning dimensions) in Supabase</li>
 <li>Building repositionable cover images while preventing layout breakage or white space overflow</li>
 <li>Writing extensive unit and integration tests for a highly interactive UI, achieving over 95% line coverage</li>
 <li>Mocking external dependencies (Supabase, drag events, image repositioning, emoji picker) for reliable tests</li>
 <li>Ensuring keyboard usability in an interactive editor environment</li>
+</ul>
 
 <h3>Possible Future Improvements:</h3>
+<ul>
 <li>Unsplash API integration to allow users to choose from stock photos for cover images</li>
 <li>Page descriptions and/or tags</li>
 <li>Rich text formatting (bold, italic, inline code, etc)</li>
@@ -139,5 +142,6 @@ Live Site: https://noted-notebook.netlify.app/
 <li>Public page sharing + read-only views</li>
 <li>Import/export pages</li>
 <li>Dark mode</li>
+</ul>
 
   
